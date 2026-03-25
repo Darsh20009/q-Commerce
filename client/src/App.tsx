@@ -1,0 +1,181 @@
+import { Switch, Route } from "wouter";
+import { queryClient } from "./lib/queryClient";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "@/components/theme-provider";
+import { useLanguage } from "@/hooks/use-language";
+import { AuthProvider } from "@/components/auth-provider";
+import { SplashScreen } from "@/components/SplashScreen";
+import { useState } from "react";
+import NotFound from "@/pages/not-found";
+import Home from "@/pages/Home";
+import Products from "@/pages/Products";
+import ProductDetails from "@/pages/ProductDetails";
+import Cart from "@/pages/Cart";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
+import ProfileInvoices from "@/pages/ProfileInvoices";
+import Admin from "@/pages/Admin";
+import Dashboard from "@/pages/Dashboard";
+import Employees from "@/pages/Employees";
+import Orders from "@/pages/Orders";
+import OrderDetail from "@/pages/OrderDetail";
+import Terms from "@/pages/Terms";
+import ForgotPassword from "@/pages/ForgotPassword";
+import Checkout from "@/pages/Checkout";
+import PaymentGateway from "@/pages/PaymentGateway";
+import TamaraCheckout from "@/pages/TamaraCheckout";
+import TabbyCheckout from "@/pages/TabbyCheckout";
+import STCCheckout from "@/pages/STCCheckout";
+
+import Profile from "@/pages/Profile";
+
+import AdminBranches from "@/pages/AdminBranches";
+import AdminBranchInventory from "@/pages/AdminBranchInventory";
+import AdminStaff from "@/pages/AdminStaff";
+import AdminBanners from "@/pages/AdminBanners";
+
+import AdminAuditLogs from "@/pages/AdminAuditLogs";
+import AdminRoles from "@/pages/AdminRoles";
+import POS from "@/pages/POS";
+import CashDrawer from "@/pages/CashDrawer";
+import CashDrawerReport from "@/pages/CashDrawerReport";
+
+import { useAuth } from "@/hooks/use-auth";
+import { Loader2 } from "lucide-react";
+import { useLocation } from "wouter";
+
+// Protected Route Component
+function ProtectedRoute({ component: Component, permission }: { component: React.ComponentType, permission?: string }) {
+  const { user, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
+
+  if (isLoading) return <div className="flex items-center justify-center h-screen"><Loader2 className="animate-spin" /></div>;
+  if (!user) {
+    setLocation("/login");
+    return null;
+  }
+
+  if (permission && user.role !== "admin" && (!user.permissions || !user.permissions.includes(permission))) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen p-8 text-center" dir="rtl">
+        <h2 className="text-2xl font-bold mb-4">عذراً، ليس لديك صلاحية للوصول لهذه الصفحة</h2>
+        <p className="text-muted-foreground">يرجى التواصل مع الإدارة إذا كنت تعتقد أن هذا خطأ.</p>
+      </div>
+    );
+  }
+
+  return <Component />;
+}
+
+function Router() {
+  return (
+    <Switch>
+      <Route path="/" component={Home} />
+      <Route path="/products" component={Products} />
+      <Route path="/products/:id" component={ProductDetails} />
+      <Route path="/cart" component={Cart} />
+      <Route path="/checkout" component={Checkout} />
+      <Route path="/login" component={Login} />
+      <Route path="/register" component={Register} />
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/profile">
+        <ProtectedRoute component={Profile} />
+      </Route>
+      <Route path="/profile/invoices">
+        <ProtectedRoute component={ProfileInvoices} />
+      </Route>
+      <Route path="/orders">
+        <ProtectedRoute component={Orders} />
+      </Route>
+      <Route path="/orders/:id">
+        <ProtectedRoute component={OrderDetail} />
+      </Route>
+      <Route path="/employees">
+        <ProtectedRoute component={Employees} permission="staff.manage" />
+      </Route>
+      <Route path="/dashboard">
+        <ProtectedRoute component={Dashboard} />
+      </Route>
+      
+      {/* Admin Section */}
+      <Route path="/admin">
+        <ProtectedRoute component={Admin} />
+      </Route>
+      <Route path="/admin/branches">
+        <ProtectedRoute component={AdminBranches} permission="settings.manage" />
+      </Route>
+      <Route path="/admin/staff">
+        <ProtectedRoute component={AdminStaff} permission="staff.manage" />
+      </Route>
+      <Route path="/admin/banners">
+        <ProtectedRoute component={AdminBanners} permission="settings.manage" />
+      </Route>
+      <Route path="/admin/audit-logs">
+        <ProtectedRoute component={AdminAuditLogs} permission="staff.manage" />
+      </Route>
+      <Route path="/admin/roles">
+        <ProtectedRoute component={AdminRoles} permission="staff.manage" />
+      </Route>
+      <Route path="/admin/inventory">
+        <ProtectedRoute component={AdminBranchInventory} permission="settings.manage" />
+      </Route>
+
+      <Route path="/pos">
+        <ProtectedRoute component={POS} permission="pos.access" />
+      </Route>
+      <Route path="/cash-drawer">
+        <ProtectedRoute component={CashDrawer} permission="pos.access" />
+      </Route>
+      <Route path="/cash-report">
+        <ProtectedRoute component={CashDrawerReport} permission="reports.view" />
+      </Route>
+      <Route path="/payment/gateway" component={PaymentGateway} />
+      <Route path="/payment/tamara-checkout" component={TamaraCheckout} />
+      <Route path="/payment/tabby-checkout" component={TabbyCheckout} />
+      <Route path="/payment/stc-checkout" component={STCCheckout} />
+      <Route path="/terms" component={Terms} />
+      <Route component={NotFound} />
+    </Switch>
+  );
+}
+
+function AppContent() {
+  const { language } = useLanguage();
+  
+  return (
+    <div dir={language === 'ar' ? 'rtl' : 'ltr'} lang={language}>
+      <Router />
+    </div>
+  );
+}
+
+export default function App() {
+  const [showSplash, setShowSplash] = useState(() => {
+    const seen = sessionStorage.getItem("qirox_splash_seen");
+    return !seen;
+  });
+
+  const handleSplashFinish = () => {
+    sessionStorage.setItem("qirox_splash_seen", "1");
+    setShowSplash(false);
+  };
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="light" storageKey="qirox-theme">
+        <TooltipProvider>
+          <AuthProvider>
+            <Toaster />
+            {showSplash ? (
+              <SplashScreen onFinish={handleSplashFinish} />
+            ) : (
+              <AppContent />
+            )}
+          </AuthProvider>
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+}

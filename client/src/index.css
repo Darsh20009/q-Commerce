@@ -1,0 +1,185 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Zid/Salla inspired Emerald/Indigo theme */
+  --background: 210 20% 98%;
+  --foreground: 222.2 84% 4.9%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+ 
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+ 
+  --primary: 161 94% 30%; /* Emerald Green */
+  --primary-foreground: 210 40% 98%;
+ 
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+ 
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+ 
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+ 
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 161 94% 30%;
+
+  --radius: 1rem;
+}
+
+@layer utilities {
+  .hover-elevate {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10;
+  }
+  .luxury-glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl;
+  }
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-emerald-400;
+  }
+}
+
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+ 
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+ 
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+ 
+  --primary: 161 94% 30%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+ 
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+ 
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+ 
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+ 
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+ 
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 161 94% 30%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Cairo', sans-serif;
+    font-size: clamp(0.875rem, 2vw, 1rem);
+  }
+  
+  /* Fluid Typography System */
+  h1 {
+    font-size: clamp(1.5rem, 6vw, 3.5rem);
+    line-height: 1.1;
+  }
+  
+  h2 {
+    font-size: clamp(1.25rem, 5vw, 2.5rem);
+    line-height: 1.2;
+  }
+  
+  h3 {
+    font-size: clamp(1.1rem, 4vw, 1.875rem);
+    line-height: 1.3;
+  }
+  
+  h4, h5, h6 {
+    font-size: clamp(1rem, 3vw, 1.5rem);
+  }
+}
+
+/* Fix Arabic Spacing: Tracking breaks Arabic connections */
+[lang="ar"] {
+  letter-spacing: normal !important;
+}
+
+[lang="ar"] * {
+  letter-spacing: normal !important;
+}
+
+/* RTL Support Utilities */
+[dir="rtl"] {
+  text-align: right;
+}
+
+/* Phone Input custom styles */
+.phone-input-container .react-tel-input .form-control {
+  font-family: inherit;
+  font-size: 14px;
+  padding-left: 48px !important;
+  width: 100% !important;
+  border-radius: 0 !important;
+}
+
+.phone-input-container .react-tel-input .flag-dropdown {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  background-color: transparent !important;
+  border-radius: 0 !important;
+}
+
+.phone-input-container .react-tel-input .selected-flag {
+  background-color: transparent !important;
+  padding: 0 12px !important;
+  border-radius: 0 !important;
+}
+
+.phone-input-container .react-tel-input .country-list {
+  border-radius: 0 !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1) !important;
+  text-align: left;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-background;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-muted rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-primary/50;
+}
+
+/* Hide scrollbar for category scroll row */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

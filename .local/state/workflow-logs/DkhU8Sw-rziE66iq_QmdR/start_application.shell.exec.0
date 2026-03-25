@@ -1,0 +1,94 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+[1G[0KConnected to MongoDB successfully
+Seeding Qirox Studio admin user...
+Admin user created with phone 567891011 and password 123456
+[WS] WebSocket server ready on /ws
+7:14:24 AM [express] serving on port 5000
+7:14:37 AM [express] POST /api/upload 500 in 7ms :: {"message":"Only images (jpeg, jpg, png, webp, gif) are allowed"}
+Error: Only images (jpeg, jpg, png, webp, gif) are allowed
+    at fileFilter (/home/runner/workspace/server/routes.ts:52:8)
+    at wrappedFileFilter (/home/runner/workspace/node_modules/multer/index.js:44:7)
+    at Multipart.<anonymous> (/home/runner/workspace/node_modules/multer/lib/make-middleware.js:132:7)
+    at Multipart.emit (node:events:524:28)
+    at HeaderParser.cb (/home/runner/workspace/node_modules/busboy/lib/types/multipart.js:358:14)
+    at HeaderParser.push (/home/runner/workspace/node_modules/busboy/lib/types/multipart.js:162:20)
+    at SBMH.ssCb [as _cb] (/home/runner/workspace/node_modules/busboy/lib/types/multipart.js:394:37)
+    at feed (/home/runner/workspace/node_modules/streamsearch/lib/sbmh.js:219:14)
+    at SBMH.push (/home/runner/workspace/node_modules/streamsearch/lib/sbmh.js:104:16)
+    at Multipart._write (/home/runner/workspace/node_modules/busboy/lib/types/multipart.js:567:19)
+    at writeOrBuffer (node:internal/streams/writable:572:12)
+    at _write (node:internal/streams/writable:501:10)
+    at Writable.write (node:internal/streams/writable:510:10)
+    at IncomingMessage.ondata (node:internal/streams/readable:1009:22)
+    at IncomingMessage.emit (node:events:524:28)
+    at Readable.read (node:internal/streams/readable:782:10)
+    at flow (node:internal/streams/readable:1283:53)
+    at resume_ (node:internal/streams/readable:1262:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+7:14:57 AM [express] GET /api/user 401 in 1ms
+7:14:57 AM [express] GET /api/marketing/active 200 in 17ms
+7:14:57 AM [express] GET /api/products 200 in 206ms :: [{"_id":"69c23a46b16306eecb665cd9","name":"Burgundy Hoodie","description":"Premium quality burgundy hoodie with comfortable fit","price":"250","cost":"150","images":["/uploads/1774347249862-904723997.png"],"variants":[{"color":"Burgundy","size":"S","sku":"BURG-S","stock":10,"cost":150,"_id":"69c23a46b16306eecb665cda"},{"color":"Burgundy","size":"M","sku":"BURG-M","stock":14,"cost":150,"_id":"69c23a46b16306eecb665cdb"},{"color":"Burgundy","size":"L","sku":"BURG-L","stock":12,"cost":150,"_id":"69c23a46b16306eecb665cdc"},{"color":"Burgundy","size":"XL","sku":"BURG-XL","stock":8,"cost":150,"_id":"69c23a46b16306eecb665cdd"}],"isFeatured":true,"createdAt":"2026-03-24T07:16:22.440Z","updatedAt":"2026-03-24T11:33:36.823Z","__v":0,"id":"69c23a46b16306eecb665cd9"},{"_id":"69c23a46b16306eecb665cdf","name":"Teal Jacket","description":"Stylish teal jacket perfect for any season","price":"100","cost":"200","images":["/uploads/1774347296030-410389820.png"],"variants":[{"color":"Teal","size":"S","sku":"TEAL-S","stock":8,"cost":200,"_id":"69c23a46b16306eecb665ce0"},{"color":"Teal","size":"M","sku":"TEAL-M","stock":6,"cost":200,"_id":"69c23a46b16306eecb665ce1"},{"color":"Teal","size":"L","sku":"TEAL-L","stock":9,"cost":200,"_id":"69c23a46b16306eecb665ce2"}],"isFeatured":true,"createdAt":"2026-03-24T07:16:22.654Z","updatedAt":"2026-03-25T03:43:40.226Z","__v":0,"id":"69c23a46b16306eecb665cdf"},{"_id":"69c23a46b16306eecb665ce4","name":"Grey Sweater","description":"Cozy grey sweater made from premium materials","price":"249.99","cost":"120","images":["https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80"],"variants":[{"color":"Grey","size":"XS","sku":"GREY-XS","stock":6,"cost":120,"_id":"69c23a46b16306eecb665ce5"},{"color":"Grey","size":"S","sku":"GREY-S","stock":10,"cost":120,"_id":"69c23a46b16306eecb665ce6"},{"color":"Grey","size":"M","sku":"GREY-M","stock":14,"cost":120,"_id":"69c23a46b16306eecb665ce7"},{"color":"Grey","size":"L","sku":"GREY-L","stock":9,"cost":120,"_id":"69c23a46b16306eecb665ce8"},{"color":"Grey","size":"XL","sku":"GREY-XL","stock":7,"cost":120,"_id":"69c23a46b16306eecb665ce9"}],"isFeatured":true,"createdAt":"2026-03-24T07:16:22.867Z","updatedAt":"2026-03-24T07:16:22.867Z","__v":0,"id":"69c23a46b16306eecb665ce4"},{"_id":"69c23a47b16306eecb665ceb","name":"QIROX Package ","description":"Classic blue hoodie with modern design","price":"320","cost":"140","images":["/uploads/1774347346067-981671507.png"],"variants":[{"color":"Blue","size":"S","sku":"BLUE-S","stock":11,"cost":140,"_id":"69c23a47b16306eecb665cec"},{"color":"Blue","size":"M","sku":"BLUE-M","stock":16,"cost":140,"_id":"69c23a47b16306eecb665ced"},{"color":"Blue","size":"L","sku":"BLUE-L","stock":13,"cost":140,"_id":"69c23a47b16306eecb665cee"}],"isFeatured":true,"createdAt":"2026-03-24T07:16:23.079Z","updatedAt":"2026-03-24T10:15:57.609Z","__v":0,"id":"69c23a47b16306eecb665ceb"}]
+7:14:57 AM [express] GET /api/categories 200 in 204ms :: [{"_id":"69c23a46b16306eecb665cd2","name":"Men","slug":"men","__v":0,"image":"https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?w=400&h=500&fit=crop&auto=format","nameAr":"رجال","id":"69c23a46b16306eecb665cd2"},{"_id":"69c23a46b16306eecb665cd3","name":"Women","slug":"women","__v":0,"image":"https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&h=500&fit=crop&auto=format","nameAr":"نساء","id":"69c23a46b16306eecb665cd3"},{"_id":"69c23a46b16306eecb665cd4","name":"Kids","slug":"kids","__v":0,"image":"https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?w=400&h=500&fit=crop&auto=format","nameAr":"أطفال","id":"69c23a46b16306eecb665cd4"},{"_id":"69c23a46b16306eecb665cd5","name":"Accessories","slug":"accessories","__v":0,"image":"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=500&fit=crop&auto=format","nameAr":"إكسسوار","id":"69c23a46b16306eecb665cd5"},{"_id":"69c23a46b16306eecb665cd6","name":"Perfumes","slug":"perfumes","__v":0,"image":"https://images.unsplash.com/photo-1541643600914-78b084683702?w=400&h=500&fit=crop&auto=format","nameAr":"عطور","id":"69c23a46b16306eecb665cd6"}]
+7:15:09 AM [express] GET /api/user 401 in 1ms
+7:15:09 AM [express] GET /api/categories 304 in 201ms :: [{"_id":"69c23a46b16306eecb665cd2","name":"Men","slug":"men","__v":0,"image":"https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?w=400&h=500&fit=crop&auto=format","nameAr":"رجال","id":"69c23a46b16306eecb665cd2"},{"_id":"69c23a46b16306eecb665cd3","name":"Women","slug":"women","__v":0,"image":"https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&h=500&fit=crop&auto=format","nameAr":"نساء","id":"69c23a46b16306eecb665cd3"},{"_id":"69c23a46b16306eecb665cd4","name":"Kids","slug":"kids","__v":0,"image":"https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?w=400&h=500&fit=crop&auto=format","nameAr":"أطفال","id":"69c23a46b16306eecb665cd4"},{"_id":"69c23a46b16306eecb665cd5","name":"Accessories","slug":"accessories","__v":0,"image":"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=500&fit=crop&auto=format","nameAr":"إكسسوار","id":"69c23a46b16306eecb665cd5"},{"_id":"69c23a46b16306eecb665cd6","name":"Perfumes","slug":"perfumes","__v":0,"image":"https://images.unsplash.com/photo-1541643600914-78b084683702?w=400&h=500&fit=crop&auto=format","nameAr":"عطور","id":"69c23a46b16306eecb665cd6"}]
+7:15:09 AM [express] GET /api/products 304 in 205ms :: [{"_id":"69c23a46b16306eecb665cd9","name":"Burgundy Hoodie","description":"Premium quality burgundy hoodie with comfortable fit","price":"250","cost":"150","images":["/uploads/1774347249862-904723997.png"],"variants":[{"color":"Burgundy","size":"S","sku":"BURG-S","stock":10,"cost":150,"_id":"69c23a46b16306eecb665cda"},{"color":"Burgundy","size":"M","sku":"BURG-M","stock":14,"cost":150,"_id":"69c23a46b16306eecb665cdb"},{"color":"Burgundy","size":"L","sku":"BURG-L","stock":12,"cost":150,"_id":"69c23a46b16306eecb665cdc"},{"color":"Burgundy","size":"XL","sku":"BURG-XL","stock":8,"cost":150,"_id":"69c23a46b16306eecb665cdd"}],"isFeatured":true,"createdAt":"2026-03-24T07:16:22.440Z","updatedAt":"2026-03-24T11:33:36.823Z","__v":0,"id":"69c23a46b16306eecb665cd9"},{"_id":"69c23a46b16306eecb665cdf","name":"Teal Jacket","description":"Stylish teal jacket perfect for any season","price":"100","cost":"200","images":["/uploads/1774347296030-410389820.png"],"variants":[{"color":"Teal","size":"S","sku":"TEAL-S","stock":8,"cost":200,"_id":"69c23a46b16306eecb665ce0"},{"color":"Teal","size":"M","sku":"TEAL-M","stock":6,"cost":200,"_id":"69c23a46b16306eecb665ce1"},{"color":"Teal","size":"L","sku":"TEAL-L","stock":9,"cost":200,"_id":"69c23a46b16306eecb665ce2"}],"isFeatured":true,"createdAt":"2026-03-24T07:16:22.654Z","updatedAt":"2026-03-25T03:43:40.226Z","__v":0,"id":"69c23a46b16306eecb665cdf"},{"_id":"69c23a46b16306eecb665ce4","name":"Grey Sweater","description":"Cozy grey sweater made from premium materials","price":"249.99","cost":"120","images":["https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80"],"variants":[{"color":"Grey","size":"XS","sku":"GREY-XS","stock":6,"cost":120,"_id":"69c23a46b16306eecb665ce5"},{"color":"Grey","size":"S","sku":"GREY-S","stock":10,"cost":120,"_id":"69c23a46b16306eecb665ce6"},{"color":"Grey","size":"M","sku":"GREY-M","stock":14,"cost":120,"_id":"69c23a46b16306eecb665ce7"},{"color":"Grey","size":"L","sku":"GREY-L","stock":9,"cost":120,"_id":"69c23a46b16306eecb665ce8"},{"color":"Grey","size":"XL","sku":"GREY-XL","stock":7,"cost":120,"_id":"69c23a46b16306eecb665ce9"}],"isFeatured":true,"createdAt":"2026-03-24T07:16:22.867Z","updatedAt":"2026-03-24T07:16:22.867Z","__v":0,"id":"69c23a46b16306eecb665ce4"},{"_id":"69c23a47b16306eecb665ceb","name":"QIROX Package ","description":"Classic blue hoodie with modern design","price":"320","cost":"140","images":["/uploads/1774347346067-981671507.png"],"variants":[{"color":"Blue","size":"S","sku":"BLUE-S","stock":11,"cost":140,"_id":"69c23a47b16306eecb665cec"},{"color":"Blue","size":"M","sku":"BLUE-M","stock":16,"cost":140,"_id":"69c23a47b16306eecb665ced"},{"color":"Blue","size":"L","sku":"BLUE-L","stock":13,"cost":140,"_id":"69c23a47b16306eecb665cee"}],"isFeatured":true,"createdAt":"2026-03-24T07:16:23.079Z","updatedAt":"2026-03-24T10:15:57.609Z","__v":0,"id":"69c23a47b16306eecb665ceb"}]
+7:15:59 AM [express] GET /api/orders 401 in 1ms
+7:16:01 AM [express] GET /api/categories 304 in 205ms :: [{"_id":"69c23a46b16306eecb665cd2","name":"Men","slug":"men","__v":0,"image":"https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?w=400&h=500&fit=crop&auto=format","nameAr":"رجال","id":"69c23a46b16306eecb665cd2"},{"_id":"69c23a46b16306eecb665cd3","name":"Women","slug":"women","__v":0,"image":"https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&h=500&fit=crop&auto=format","nameAr":"نساء","id":"69c23a46b16306eecb665cd3"},{"_id":"69c23a46b16306eecb665cd4","name":"Kids","slug":"kids","__v":0,"image":"https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?w=400&h=500&fit=crop&auto=format","nameAr":"أطفال","id":"69c23a46b16306eecb665cd4"},{"_id":"69c23a46b16306eecb665cd5","name":"Accessories","slug":"accessories","__v":0,"image":"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=500&fit=crop&auto=format","nameAr":"إكسسوار","id":"69c23a46b16306eecb665cd5"},{"_id":"69c23a46b16306eecb665cd6","name":"Perfumes","slug":"perfumes","__v":0,"image":"https://images.unsplash.com/photo-1541643600914-78b084683702?w=400&h=500&fit=crop&auto=format","nameAr":"عطور","id":"69c23a46b16306eecb665cd6"}]
+7:16:01 AM [express] GET /api/orders 401 in 1ms
+7:16:01 AM [express] GET /api/user 401 in 0ms
+7:16:06 AM [express] GET /api/auth/check-role/567891011 304 in 206ms :: {"isStaff":true,"role":"admin"}
+ValidationError: The 'X-Forwarded-For' header is set but the Express 'trust proxy' setting is false (default). This could indicate a misconfiguration which would prevent express-rate-limit from accurately identifying users. See https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/ for more information.
+    at Object.xForwardedForHeader [90m(file:///home/runner/workspace/[39mnode_modules/[4mexpress-rate-limit[24m/dist/index.mjs:342:13[90m)[39m
+    at wrappedValidations.<computed> [as xForwardedForHeader] [90m(file:///home/runner/workspace/[39mnode_modules/[4mexpress-rate-limit[24m/dist/index.mjs:656:22[90m)[39m
+    at Object.keyGenerator [90m(file:///home/runner/workspace/[39mnode_modules/[4mexpress-rate-limit[24m/dist/index.mjs:759:20[90m)[39m
+    at [90mfile:///home/runner/workspace/[39mnode_modules/[4mexpress-rate-limit[24m/dist/index.mjs:820:32
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at async [90mfile:///home/runner/workspace/[39mnode_modules/[4mexpress-rate-limit[24m/dist/index.mjs:801:5 {
+  code: [32m'ERR_ERL_UNEXPECTED_X_FORWARDED_FOR'[39m,
+  help: [32m'https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/'[39m
+}
+7:16:11 AM [express] POST /api/auth/login 200 in 252ms :: {"_id":"69c38b4f9632ea852642581e","username":"567891011","password":"4a35e3010fde8ce69aea359122964241d4c8171340b3a36c6d9f2ad8f24c98ea5b9e733eea556dbb27aafa261cebdd936ab996e004681b13fbb98623cf303cbd.ce29e51d6357275060aa512bac4b107f","role":"admin","permissions":["orders.view","orders.edit","orders.refund","products.view","products.edit","customers.view","wallet.adjust","reports.view","staff.manage","pos.access","settings.manage"],"loginType":"both","isActive":true,"mustChangePassword":false,"name":"Qirox Studio","email":"qiroxsystem@gmail.com","phone":"567891011","walletBalance":"0","addresses":[],"createdAt":"2026-03-25T07:14:23.045Z","updatedAt":"2026-03-25T07:14:23.045Z","__v":0,"id":"69c38b4f9632ea852642581e","redirectTo":"/admin"}
+7:16:12 AM [express] GET /api/admin/stats 304 in 421ms :: {"totalSales":1322.5,"netProfit":132.25,"dailySales":345,"monthlySales":1322.5,"totalOrders":10,"totalProducts":4,"totalCustomers":1,"topProducts":[{"name":"Teal Jacket","count":9,"revenue":900},{"name":"Burgundy Hoodie","count":1,"revenue":250}],"chartData":[{"month":"أكتوبر","sales":0,"orders":0},{"month":"نوفمبر","sales":0,"orders":0},{"month":"ديسمبر","sales":0,"orders":0},{"month":"يناير","sales":0,"orders":0},{"month":"فبراير","sales":0,"orders":0},{"month":"مارس","sales":1322.5,"orders":10}]}
+7:16:26 AM [express] POST /api/upload 500 in 211ms :: {"message":"Unexpected field"}
+MulterError: Unexpected field
+    at wrappedFileFilter (/home/runner/workspace/node_modules/multer/index.js:40:19)
+    at Multipart.<anonymous> (/home/runner/workspace/node_modules/multer/lib/make-middleware.js:132:7)
+    at Multipart.emit (node:events:524:28)
+    at HeaderParser.cb (/home/runner/workspace/node_modules/busboy/lib/types/multipart.js:358:14)
+    at HeaderParser.push (/home/runner/workspace/node_modules/busboy/lib/types/multipart.js:162:20)
+    at SBMH.ssCb [as _cb] (/home/runner/workspace/node_modules/busboy/lib/types/multipart.js:394:37)
+    at feed (/home/runner/workspace/node_modules/streamsearch/lib/sbmh.js:248:10)
+    at SBMH.push (/home/runner/workspace/node_modules/streamsearch/lib/sbmh.js:104:16)
+    at Multipart._write (/home/runner/workspace/node_modules/busboy/lib/types/multipart.js:567:19)
+    at writeOrBuffer (node:internal/streams/writable:572:12)
+    at _write (node:internal/streams/writable:501:10)
+    at Writable.write (node:internal/streams/writable:510:10)
+    at IncomingMessage.ondata (node:internal/streams/readable:1009:22)
+    at IncomingMessage.emit (node:events:524:28)
+    at Readable.read (node:internal/streams/readable:782:10)
+    at flow (node:internal/streams/readable:1283:53)
+    at resume_ (node:internal/streams/readable:1262:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+7:16:38 AM [express] POST /api/upload 500 in 210ms :: {"message":"Unexpected field"}
+MulterError: Unexpected field
+    at wrappedFileFilter (/home/runner/workspace/node_modules/multer/index.js:40:19)
+    at Multipart.<anonymous> (/home/runner/workspace/node_modules/multer/lib/make-middleware.js:132:7)
+    at Multipart.emit (node:events:524:28)
+    at HeaderParser.cb (/home/runner/workspace/node_modules/busboy/lib/types/multipart.js:358:14)
+    at HeaderParser.push (/home/runner/workspace/node_modules/busboy/lib/types/multipart.js:162:20)
+    at SBMH.ssCb [as _cb] (/home/runner/workspace/node_modules/busboy/lib/types/multipart.js:394:37)
+    at feed (/home/runner/workspace/node_modules/streamsearch/lib/sbmh.js:248:10)
+    at SBMH.push (/home/runner/workspace/node_modules/streamsearch/lib/sbmh.js:104:16)
+    at Multipart._write (/home/runner/workspace/node_modules/busboy/lib/types/multipart.js:567:19)
+    at writeOrBuffer (node:internal/streams/writable:572:12)
+    at _write (node:internal/streams/writable:501:10)
+    at Writable.write (node:internal/streams/writable:510:10)
+    at IncomingMessage.ondata (node:internal/streams/readable:1009:22)
+    at IncomingMessage.emit (node:events:524:28)
+    at Readable.read (node:internal/streams/readable:782:10)
+    at flow (node:internal/streams/readable:1283:53)
+    at resume_ (node:internal/streams/readable:1262:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
