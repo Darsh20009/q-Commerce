@@ -623,8 +623,7 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
-              <Link href="/tabby-checkout">
-                <div className="group relative rounded-2xl overflow-hidden cursor-pointer border border-[#3bff9d]/20 hover:border-[#3bff9d]/50 transition-all duration-500 bg-gradient-to-br from-[#0d1f17] via-[#0a1a12] to-[#060e0a]">
+              <div className="group relative rounded-2xl overflow-hidden border border-[#3bff9d]/20 hover:border-[#3bff9d]/50 transition-all duration-500 bg-gradient-to-br from-[#0d1f17] via-[#0a1a12] to-[#060e0a]">
                   {/* Glow on hover */}
                   <div className="absolute inset-0 bg-gradient-to-br from-[#3bff9d]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   {/* Top accent line */}
@@ -679,14 +678,13 @@ export default function Home() {
 
                     {/* CTA */}
                     <div className={`flex items-center gap-2 ${isRtl ? "flex-row-reverse" : ""}`}>
-                      <span className="text-[#3bff9d] text-sm font-black group-hover:gap-3 transition-all flex items-center gap-1.5">
-                        {isRtl ? "ادفع مع تابي" : "Pay with Tabby"}
+                      <span className="text-[#3bff9d] text-sm font-black flex items-center gap-1.5">
+                        {isRtl ? "اعرف أكثر" : "Learn More"}
                         {isRtl ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                       </span>
                     </div>
                   </div>
                 </div>
-              </Link>
             </motion.div>
 
             {/* ── TAMARA CARD ── */}
@@ -696,8 +694,7 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.1 }}
             >
-              <Link href="/tamara-checkout">
-                <div className="group relative rounded-2xl overflow-hidden cursor-pointer border border-[#9b6dff]/20 hover:border-[#9b6dff]/50 transition-all duration-500 bg-gradient-to-br from-[#140d24] via-[#10091e] to-[#0a0612]">
+              <div className="group relative rounded-2xl overflow-hidden border border-[#9b6dff]/20 hover:border-[#9b6dff]/50 transition-all duration-500 bg-gradient-to-br from-[#140d24] via-[#10091e] to-[#0a0612]">
                   {/* Glow on hover */}
                   <div className="absolute inset-0 bg-gradient-to-br from-[#9b6dff]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   {/* Top accent line */}
@@ -753,13 +750,12 @@ export default function Home() {
                     {/* CTA */}
                     <div className={`flex items-center gap-2 ${isRtl ? "flex-row-reverse" : ""}`}>
                       <span className="text-[#b48cff] text-sm font-black flex items-center gap-1.5">
-                        {isRtl ? "ادفع مع تمارا" : "Pay with Tamara"}
+                        {isRtl ? "اعرف أكثر" : "Learn More"}
                         {isRtl ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                       </span>
                     </div>
                   </div>
                 </div>
-              </Link>
             </motion.div>
           </div>
 
