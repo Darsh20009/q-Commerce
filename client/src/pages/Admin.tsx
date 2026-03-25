@@ -352,11 +352,17 @@ const EditProductDialog = memo(({ product, categories, open, onOpenChange }: any
   const { toast } = useToast();
   const [variants, setVariants] = useState<any[]>([]);
   const lastProductIdRef = React.useRef<string | null>(null);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
 
   useEffect(() => {
     if (open && product && product.id !== lastProductIdRef.current) {
       setVariants(product.variants || []);
       lastProductIdRef.current = product.id;
+      // Load existing categoryIds or fall back to single categoryId
+      const ids = (product as any).categoryIds?.length
+        ? (product as any).categoryIds
+        : (product as any).categoryId ? [(product as any).categoryId] : [];
+      setSelectedCategoryIds(ids);
     } else if (!open) {
       lastProductIdRef.current = null;
     }
@@ -370,10 +376,25 @@ const EditProductDialog = memo(({ product, categories, open, onOpenChange }: any
       price: product?.price || "0",
       cost: product?.cost || "0",
       images: product?.images || [],
-      categoryId: (product as any)?.categoryId || "",
+      categoryIds: [],
       variants: (product as any)?.variants || [],
       isFeatured: product?.isFeatured || false,
     } as any
+  });
+
+  const toggleCategoryId = (id: string) => {
+    setSelectedCategoryIds(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  };
+
+  const parentCats = (categories || []).filter((c: any) => !c.parentId);
+  const subCatsMap: Record<string, any[]> = {};
+  (categories || []).forEach((c: any) => {
+    if (c.parentId) {
+      if (!subCatsMap[c.parentId]) subCatsMap[c.parentId] = [];
+      subCatsMap[c.parentId].push(c);
+    }
   });
 
   const updateVariant = (index: number, field: string, value: any) => {
@@ -447,6 +468,8 @@ const EditProductDialog = memo(({ product, categories, open, onOpenChange }: any
     try {
       const payload = {
         ...data,
+        categoryIds: selectedCategoryIds,
+        categoryId: selectedCategoryIds[0] || "",
         variants: variants.map(v => ({
           ...v,
           stock: Number(v.stock),
@@ -485,17 +508,41 @@ const EditProductDialog = memo(({ product, categories, open, onOpenChange }: any
 
            <div className="grid grid-cols-2 gap-6 text-right">
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-bold uppercase tracking-widest text-black/40">الفئة</Label>
-                  <Select value={form.watch("categoryId" as any)} onValueChange={(v) => form.setValue("categoryId" as any, v)}>
-                    <SelectTrigger className="rounded-none h-12 text-right">
-                      <SelectValue placeholder="اختر الفئة" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories?.map((c: any) => (
-                        <SelectItem key={c.id} value={c.id}>{c.nameAr ? `${c.nameAr} / ${c.name}` : c.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-black/40">
+                    الفئات
+                    {selectedCategoryIds.length > 0 && (
+                      <span className="mr-2 text-primary">({selectedCategoryIds.length} محدد)</span>
+                    )}
+                  </Label>
+                  <div className="border border-black/10 rounded-none p-2 max-h-48 overflow-y-auto space-y-0.5 bg-white">
+                    {parentCats.length === 0 && <p className="text-[10px] text-black/30 py-2 text-center">لا توجد فئات</p>}
+                    {parentCats.map((parent: any) => (
+                      <div key={parent.id}>
+                        <label className="flex items-center gap-2 cursor-pointer hover:bg-black/5 px-2 py-1.5 rounded-sm">
+                          <input
+                            type="checkbox"
+                            checked={selectedCategoryIds.includes(parent.id)}
+                            onChange={() => toggleCategoryId(parent.id)}
+                            className="rounded-none accent-black"
+                          />
+                          <span className="text-[11px] font-bold">{parent.nameAr || parent.name}</span>
+                          {parent.name !== parent.nameAr && parent.nameAr && <span className="text-[9px] text-black/30">{parent.name}</span>}
+                        </label>
+                        {(subCatsMap[parent.id] || []).map((sub: any) => (
+                          <label key={sub.id} className="flex items-center gap-2 cursor-pointer hover:bg-black/5 px-2 py-1.5 rounded-sm pr-6">
+                            <input
+                              type="checkbox"
+                              checked={selectedCategoryIds.includes(sub.id)}
+                              onChange={() => toggleCategoryId(sub.id)}
+                              className="rounded-none accent-black"
+                            />
+                            <span className="text-[10px] text-black/50">└</span>
+                            <span className="text-[11px]">{sub.nameAr || sub.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label className="text-[10px] font-bold uppercase tracking-widest text-black/40">التكلفة (ر.س)</Label>
@@ -551,7 +598,7 @@ const EditProductDialog = memo(({ product, categories, open, onOpenChange }: any
                 <Label className="text-[10px] font-bold uppercase tracking-widest text-black/40">الوصف التفصيلي</Label>
                 <DescriptionGenerator
                   productName={form.watch("name") || ""}
-                  productCategory={categories?.find((c: any) => c.id === form.watch("categoryId" as any))?.name || "ملابس"}
+                  productCategory={categories?.find((c: any) => c.id === selectedCategoryIds[0])?.name || "ملابس"}
                   price={Number(form.watch("price")) || 0}
                   onApply={(desc) => form.setValue("description", desc)}
                 />
@@ -620,6 +667,22 @@ const ProductsTable = memo(() => {
   const [open, setOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [variants, setVariants] = useState<any[]>([]);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
+
+  const parentCats = (categories || []).filter((c: any) => !c.parentId);
+  const subCatsMap: Record<string, any[]> = {};
+  (categories || []).forEach((c: any) => {
+    if (c.parentId) {
+      if (!subCatsMap[c.parentId]) subCatsMap[c.parentId] = [];
+      subCatsMap[c.parentId].push(c);
+    }
+  });
+
+  const toggleCategoryId = (id: string) => {
+    setSelectedCategoryIds(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  };
 
   const form = useForm<InsertProduct>({
     resolver: zodResolver(insertProductSchema),
@@ -629,7 +692,7 @@ const ProductsTable = memo(() => {
       price: "0",
       cost: "0",
       images: [],
-      categoryId: "",
+      categoryIds: [],
       variants: [],
       isFeatured: false,
     } as any
@@ -643,11 +706,16 @@ const ProductsTable = memo(() => {
         price: editingProduct.price,
         cost: editingProduct.cost,
         images: editingProduct.images || [],
-        categoryId: (editingProduct as any).categoryId,
+        categoryIds: [],
         isFeatured: editingProduct.isFeatured,
         variants: (editingProduct as any).variants || [],
       } as any);
       setVariants((editingProduct as any).variants || []);
+      // Load existing categoryIds or fall back to single categoryId
+      const ids = (editingProduct as any).categoryIds?.length
+        ? (editingProduct as any).categoryIds
+        : (editingProduct as any).categoryId ? [(editingProduct as any).categoryId] : [];
+      setSelectedCategoryIds(ids);
     } else {
       form.reset({
         name: "",
@@ -655,11 +723,12 @@ const ProductsTable = memo(() => {
         price: "0",
         cost: "0",
         images: [],
-        categoryId: "",
+        categoryIds: [],
         variants: [],
         isFeatured: false,
       } as any);
       setVariants([]);
+      setSelectedCategoryIds([]);
     }
   }, [editingProduct]); // Removed 'form' from dependencies to avoid infinite loop
 
@@ -691,6 +760,8 @@ const ProductsTable = memo(() => {
     try {
       const payload = {
         ...data,
+        categoryIds: selectedCategoryIds,
+        categoryId: selectedCategoryIds[0] || "",
         variants: variants.map(v => ({
           ...v,
           stock: Number(v.stock),
@@ -708,6 +779,7 @@ const ProductsTable = memo(() => {
       }
       setOpen(false);
       setEditingProduct(null);
+      setSelectedCategoryIds([]);
       queryClient.invalidateQueries({ queryKey: [api.products.list.path] });
     } catch (e) {
       toast({ title: "خطأ", description: "فشل حفظ المنتج", variant: "destructive" });
@@ -800,17 +872,41 @@ const ProductsTable = memo(() => {
 
               <div className="grid grid-cols-2 gap-6 text-right">
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-bold uppercase tracking-widest text-black/40">الفئة</Label>
-                  <Select value={form.watch("categoryId" as any)} onValueChange={(v) => form.setValue("categoryId" as any, v)}>
-                    <SelectTrigger className="rounded-none h-12 text-right">
-                      <SelectValue placeholder="اختر الفئة" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories?.map(c => (
-                        <SelectItem key={c.id} value={c.id}>{(c as any).nameAr ? `${(c as any).nameAr} / ${c.name}` : c.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-black/40">
+                    الفئات
+                    {selectedCategoryIds.length > 0 && (
+                      <span className="mr-2 text-primary">({selectedCategoryIds.length} محدد)</span>
+                    )}
+                  </Label>
+                  <div className="border border-black/10 rounded-none p-2 max-h-48 overflow-y-auto space-y-0.5 bg-white">
+                    {parentCats.length === 0 && <p className="text-[10px] text-black/30 py-2 text-center">لا توجد فئات</p>}
+                    {parentCats.map((parent: any) => (
+                      <div key={parent.id}>
+                        <label className="flex items-center gap-2 cursor-pointer hover:bg-black/5 px-2 py-1.5 rounded-sm">
+                          <input
+                            type="checkbox"
+                            checked={selectedCategoryIds.includes(parent.id)}
+                            onChange={() => toggleCategoryId(parent.id)}
+                            className="accent-black"
+                          />
+                          <span className="text-[11px] font-bold">{parent.nameAr || parent.name}</span>
+                          {parent.nameAr && parent.name !== parent.nameAr && <span className="text-[9px] text-black/30">{parent.name}</span>}
+                        </label>
+                        {(subCatsMap[parent.id] || []).map((sub: any) => (
+                          <label key={sub.id} className="flex items-center gap-2 cursor-pointer hover:bg-black/5 px-2 py-1.5 rounded-sm pr-6">
+                            <input
+                              type="checkbox"
+                              checked={selectedCategoryIds.includes(sub.id)}
+                              onChange={() => toggleCategoryId(sub.id)}
+                              className="accent-black"
+                            />
+                            <span className="text-[10px] text-black/40">└</span>
+                            <span className="text-[11px]">{sub.nameAr || sub.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label className="text-[10px] font-bold uppercase tracking-widest text-black/40">التكلفة (ر.س)</Label>
@@ -866,7 +962,7 @@ const ProductsTable = memo(() => {
                 <Label className="text-[10px] font-bold uppercase tracking-widest text-black/40">الوصف التفصيلي</Label>
                 <DescriptionGenerator
                   productName={form.watch("name") || ""}
-                  productCategory={categories?.find((c: any) => c.id === form.watch("categoryId" as any))?.name || "ملابس"}
+                  productCategory={categories?.find((c: any) => c.id === selectedCategoryIds[0])?.name || "ملابس"}
                   price={Number(form.watch("price")) || 0}
                   onApply={(desc) => form.setValue("description", desc)}
                 />
@@ -949,7 +1045,13 @@ const ProductsTable = memo(() => {
         <div className="divide-y divide-black/5">
           {products?.map(product => {
             const totalStock = (product as any).variants?.reduce((sum: number, v: any) => sum + (v.stock || 0), 0) || 0;
-            const category = categories?.find(c => c.id === (product as any).categoryId);
+            const productCatIds: string[] = (product as any).categoryIds?.length
+              ? (product as any).categoryIds
+              : (product as any).categoryId ? [(product as any).categoryId] : [];
+            const productCatNames = productCatIds
+              .map((id: string) => categories?.find(c => c.id === id))
+              .filter(Boolean)
+              .map((c: any) => c.nameAr || c.name);
             return (
               <div key={product.id} className="p-6 grid grid-cols-6 items-center hover:bg-secondary/5 transition-colors">
                 <div className="flex items-center gap-3">
@@ -966,7 +1068,7 @@ const ProductsTable = memo(() => {
                   </div>
                 </div>
                 <div className="text-[10px] font-black uppercase opacity-60">
-                  {category?.name || "بدون فئة"}
+                  {productCatNames.length > 0 ? productCatNames.join("، ") : "بدون فئة"}
                 </div>
                 <div className="font-black tracking-tighter text-xs">{Number(product.price).toLocaleString()} ر.س</div>
                 <div className="font-bold text-xs">

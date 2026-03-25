@@ -135,6 +135,7 @@ export const insertProductSchema = z.object({
   barcode: z.string().optional(),
   printBarcode: z.boolean().default(true),
   categoryId: z.string().optional(),
+  categoryIds: z.array(z.string()).default([]),
   variants: z.array(z.object({
     color: z.string().optional(),
     size: z.string().optional(),

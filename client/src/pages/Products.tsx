@@ -132,10 +132,16 @@ export default function Products() {
       } else if (activeParentId) {
         if (activeSubCategory) {
           const sub = (dbCategories || []).find((c: any) => c.slug === activeSubCategory);
-          list = sub ? list.filter(p => (p as any).categoryId === sub.id) : list;
+          list = sub ? list.filter(p => {
+            const ids: string[] = (p as any).categoryIds?.length ? (p as any).categoryIds : (p as any).categoryId ? [(p as any).categoryId] : [];
+            return ids.includes(sub.id);
+          }) : list;
         } else {
           const childIds = new Set([activeParentId, ...(subCategoriesMap[activeParentId] || []).map((c: any) => c.id)]);
-          list = list.filter(p => childIds.has((p as any).categoryId));
+          list = list.filter(p => {
+            const ids: string[] = (p as any).categoryIds?.length ? (p as any).categoryIds : (p as any).categoryId ? [(p as any).categoryId] : [];
+            return ids.some(id => childIds.has(id));
+          });
         }
       }
     }
@@ -143,7 +149,10 @@ export default function Products() {
     // Sub-category filter (special case: within "all")
     if (activeSubCategory && activeCategory === "all") {
       const sub = (dbCategories || []).find((c: any) => c.slug === activeSubCategory);
-      if (sub) list = list.filter(p => (p as any).categoryId === sub.id);
+      if (sub) list = list.filter(p => {
+        const ids: string[] = (p as any).categoryIds?.length ? (p as any).categoryIds : (p as any).categoryId ? [(p as any).categoryId] : [];
+        return ids.includes(sub.id);
+      });
     }
 
     // Search

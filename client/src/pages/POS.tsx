@@ -199,7 +199,8 @@ export default function POS() {
       const prod = p as any;
       const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || 
                           (prod.variants && prod.variants.some((v: any) => v.sku.toLowerCase().includes(search.toLowerCase())));
-      const matchesCategory = !selectedCategory || (p as any).categoryId === selectedCategory;
+      const pCatIds: string[] = (p as any).categoryIds?.length ? (p as any).categoryIds : (p as any).categoryId ? [(p as any).categoryId] : [];
+      const matchesCategory = !selectedCategory || pCatIds.includes(selectedCategory);
       return matchesSearch && matchesCategory;
     });
   }, [products, search, selectedCategory]);
