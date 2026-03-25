@@ -1,0 +1,103 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+[1G[0KConnected to MongoDB successfully
+Seeding Qirox Studio admin user...
+Admin user created with phone 567891011 and password 123456
+[WS] WebSocket server ready on /ws
+4:56:33 AM [express] serving on port 5000
+4:56:43 AM [express] GET /api/user 401 in 2ms
+4:56:43 AM [express] GET /api/marketing/active 200 in 38ms
+4:56:44 AM [express] GET /api/products 304 in 204ms :: [{"_id":"69c23a46b16306eecb665cd9","name":"Burgundy Hoodie","description":"Premium quality burgundy hoodie with comfortable fit","price":"250","cost":"150","images":["/uploads/1774347249862-904723997.png"],"variants":[{"color":"Burgundy","size":"S","sku":"BURG-S","stock":10,"cost":150,"_id":"69c23a46b16306eecb665cda"},{"color":"Burgundy","size":"M","sku":"BURG-M","stock":14,"cost":150,"_id":"69c23a46b16306eecb665cdb"},{"color":"Burgundy","size":"L","sku":"BURG-L","stock":12,"cost":150,"_id":"69c23a46b16306eecb665cdc"},{"color":"Burgundy","size":"XL","sku":"BURG-XL","stock":8,"cost":150,"_id":"69c23a46b16306eecb665cdd"}],"isFeatured":true,"createdAt":"2026-03-24T07:16:22.440Z","updatedAt":"2026-03-24T11:33:36.823Z","__v":0,"id":"69c23a46b16306eecb665cd9"},{"_id":"69c23a46b16306eecb665cdf","name":"Teal Jacket","description":"Stylish teal jacket perfect for any season","price":"100","cost":"200","images":["/uploads/1774347296030-410389820.png"],"variants":[{"color":"Teal","size":"S","sku":"TEAL-S","stock":8,"cost":200,"_id":"69c23a46b16306eecb665ce0"},{"color":"Teal","size":"M","sku":"TEAL-M","stock":6,"cost":200,"_id":"69c23a46b16306eecb665ce1"},{"color":"Teal","size":"L","sku":"TEAL-L","stock":9,"cost":200,"_id":"69c23a46b16306eecb665ce2"}],"isFeatured":true,"createdAt":"2026-03-24T07:16:22.654Z","updatedAt":"2026-03-25T03:43:40.226Z","__v":0,"id":"69c23a46b16306eecb665cdf"},{"_id":"69c23a46b16306eecb665ce4","name":"Grey Sweater","description":"Cozy grey sweater made from premium materials","price":"249.99","cost":"120","images":["https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80"],"variants":[{"color":"Grey","size":"XS","sku":"GREY-XS","stock":6,"cost":120,"_id":"69c23a46b16306eecb665ce5"},{"color":"Grey","size":"S","sku":"GREY-S","stock":10,"cost":120,"_id":"69c23a46b16306eecb665ce6"},{"color":"Grey","size":"M","sku":"GREY-M","stock":14,"cost":120,"_id":"69c23a46b16306eecb665ce7"},{"color":"Grey","size":"L","sku":"GREY-L","stock":9,"cost":120,"_id":"69c23a46b16306eecb665ce8"},{"color":"Grey","size":"XL","sku":"GREY-XL","stock":7,"cost":120,"_id":"69c23a46b16306eecb665ce9"}],"isFeatured":true,"createdAt":"2026-03-24T07:16:22.867Z","updatedAt":"2026-03-24T07:16:22.867Z","__v":0,"id":"69c23a46b16306eecb665ce4"},{"_id":"69c23a47b16306eecb665ceb","name":"QIROX Package ","description":"Classic blue hoodie with modern design","price":"320","cost":"140","images":["/uploads/1774347346067-981671507.png"],"variants":[{"color":"Blue","size":"S","sku":"BLUE-S","stock":11,"cost":140,"_id":"69c23a47b16306eecb665cec"},{"color":"Blue","size":"M","sku":"BLUE-M","stock":16,"cost":140,"_id":"69c23a47b16306eecb665ced"},{"color":"Blue","size":"L","sku":"BLUE-L","stock":13,"cost":140,"_id":"69c23a47b16306eecb665cee"}],"isFeatured":true,"createdAt":"2026-03-24T07:16:23.079Z","updatedAt":"2026-03-24T10:15:57.609Z","__v":0,"id":"69c23a47b16306eecb665ceb"}]
+4:57:20 AM [express] POST /api/auth/login 200 in 261ms :: {"_id":"69c36b00c1dd98dbe6e8bf55","username":"567891011","password":"e9ba53d8edc86b82c8b69549c18955e633c2619f9636a559d791816f67a09b107f888cd659e69a30bc293edc697a3515623dc938028b9ac2cd2b18e11d808edb.c1bb9c99bbf629f891e4347e7c37da93","role":"admin","permissions":["orders.view","orders.edit","orders.refund","products.view","products.edit","customers.view","wallet.adjust","reports.view","staff.manage","pos.access","settings.manage"],"loginType":"both","isActive":true,"mustChangePassword":false,"name":"Qirox Studio","email":"qiroxsystem@gmail.com","phone":"567891011","walletBalance":"0","addresses":[],"createdAt":"2026-03-25T04:56:32.421Z","updatedAt":"2026-03-25T04:56:32.421Z","__v":0,"id":"69c36b00c1dd98dbe6e8bf55","redirectTo":"/admin"}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m4:58:19 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/Login.tsx, /src/index.css[22m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m4:58:22 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/Login.tsx, /src/index.css[22m [33m(x2)[39m

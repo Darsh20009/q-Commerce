@@ -1,0 +1,217 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+[1G[0KConnected to MongoDB successfully
+Seeding Qirox Studio admin user...
+Admin user created with phone 567891011 and password 123456
+[WS] WebSocket server ready on /ws
+3:53:47 AM [express] serving on port 5000
+
+[1m[33mwarn[39m[22m - The class `duration-[3000ms]` is ambiguous and matches multiple utilities.
+[1m[33mwarn[39m[22m - If this is content and not a class, replace it with `duration-&lsqb;3000ms&rsqb;` to silence this warning.
+
+[1m[33mwarn[39m[22m - The class `duration-[4000ms]` is ambiguous and matches multiple utilities.
+[1m[33mwarn[39m[22m - If this is content and not a class, replace it with `duration-&lsqb;4000ms&rsqb;` to silence this warning.
+3:53:53 AM [express] GET /api/user 401 in 2ms
+3:53:53 AM [express] GET /api/marketing/active 200 in 18ms
+3:53:53 AM [express] GET /api/products 304 in 208ms :: [{"_id":"69c23a46b16306eecb665cd9","name":"Burgundy Hoodie","description":"Premium quality burgundy hoodie with comfortable fit","price":"250","cost":"150","images":["/uploads/1774347249862-904723997.png"],"variants":[{"color":"Burgundy","size":"S","sku":"BURG-S","stock":10,"cost":150,"_id":"69c23a46b16306eecb665cda"},{"color":"Burgundy","size":"M","sku":"BURG-M","stock":14,"cost":150,"_id":"69c23a46b16306eecb665cdb"},{"color":"Burgundy","size":"L","sku":"BURG-L","stock":12,"cost":150,"_id":"69c23a46b16306eecb665cdc"},{"color":"Burgundy","size":"XL","sku":"BURG-XL","stock":8,"cost":150,"_id":"69c23a46b16306eecb665cdd"}],"isFeatured":true,"createdAt":"2026-03-24T07:16:22.440Z","updatedAt":"2026-03-24T11:33:36.823Z","__v":0,"id":"69c23a46b16306eecb665cd9"},{"_id":"69c23a46b16306eecb665cdf","name":"Teal Jacket","description":"Stylish teal jacket perfect for any season","price":"100","cost":"200","images":["/uploads/1774347296030-410389820.png"],"variants":[{"color":"Teal","size":"S","sku":"TEAL-S","stock":8,"cost":200,"_id":"69c23a46b16306eecb665ce0"},{"color":"Teal","size":"M","sku":"TEAL-M","stock":6,"cost":200,"_id":"69c23a46b16306eecb665ce1"},{"color":"Teal","size":"L","sku":"TEAL-L","stock":9,"cost":200,"_id":"69c23a46b16306eecb665ce2"}],"isFeatured":true,"createdAt":"2026-03-24T07:16:22.654Z","updatedAt":"2026-03-25T03:43:40.226Z","__v":0,"id":"69c23a46b16306eecb665cdf"},{"_id":"69c23a46b16306eecb665ce4","name":"Grey Sweater","description":"Cozy grey sweater made from premium materials","price":"249.99","cost":"120","images":["https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80"],"variants":[{"color":"Grey","size":"XS","sku":"GREY-XS","stock":6,"cost":120,"_id":"69c23a46b16306eecb665ce5"},{"color":"Grey","size":"S","sku":"GREY-S","stock":10,"cost":120,"_id":"69c23a46b16306eecb665ce6"},{"color":"Grey","size":"M","sku":"GREY-M","stock":14,"cost":120,"_id":"69c23a46b16306eecb665ce7"},{"color":"Grey","size":"L","sku":"GREY-L","stock":9,"cost":120,"_id":"69c23a46b16306eecb665ce8"},{"color":"Grey","size":"XL","sku":"GREY-XL","stock":7,"cost":120,"_id":"69c23a46b16306eecb665ce9"}],"isFeatured":true,"createdAt":"2026-03-24T07:16:22.867Z","updatedAt":"2026-03-24T07:16:22.867Z","__v":0,"id":"69c23a46b16306eecb665ce4"},{"_id":"69c23a47b16306eecb665ceb","name":"QIROX Package ","description":"Classic blue hoodie with modern design","price":"320","cost":"140","images":["/uploads/1774347346067-981671507.png"],"variants":[{"color":"Blue","size":"S","sku":"BLUE-S","stock":11,"cost":140,"_id":"69c23a47b16306eecb665cec"},{"color":"Blue","size":"M","sku":"BLUE-M","stock":16,"cost":140,"_id":"69c23a47b16306eecb665ced"},{"color":"Blue","size":"L","sku":"BLUE-L","stock":13,"cost":140,"_id":"69c23a47b16306eecb665cee"}],"isFeatured":true,"createdAt":"2026-03-24T07:16:23.079Z","updatedAt":"2026-03-24T10:15:57.609Z","__v":0,"id":"69c23a47b16306eecb665ceb"}]
+3:53:59 AM [express] GET /api/user 401 in 0ms
+3:53:59 AM [express] GET /api/marketing/active 200 in 9ms
+3:53:59 AM [express] GET /api/products 200 in 207ms :: [{"_id":"69c23a46b16306eecb665cd9","name":"Burgundy Hoodie","description":"Premium quality burgundy hoodie with comfortable fit","price":"250","cost":"150","images":["/uploads/1774347249862-904723997.png"],"variants":[{"color":"Burgundy","size":"S","sku":"BURG-S","stock":10,"cost":150,"_id":"69c23a46b16306eecb665cda"},{"color":"Burgundy","size":"M","sku":"BURG-M","stock":14,"cost":150,"_id":"69c23a46b16306eecb665cdb"},{"color":"Burgundy","size":"L","sku":"BURG-L","stock":12,"cost":150,"_id":"69c23a46b16306eecb665cdc"},{"color":"Burgundy","size":"XL","sku":"BURG-XL","stock":8,"cost":150,"_id":"69c23a46b16306eecb665cdd"}],"isFeatured":true,"createdAt":"2026-03-24T07:16:22.440Z","updatedAt":"2026-03-24T11:33:36.823Z","__v":0,"id":"69c23a46b16306eecb665cd9"},{"_id":"69c23a46b16306eecb665cdf","name":"Teal Jacket","description":"Stylish teal jacket perfect for any season","price":"100","cost":"200","images":["/uploads/1774347296030-410389820.png"],"variants":[{"color":"Teal","size":"S","sku":"TEAL-S","stock":8,"cost":200,"_id":"69c23a46b16306eecb665ce0"},{"color":"Teal","size":"M","sku":"TEAL-M","stock":6,"cost":200,"_id":"69c23a46b16306eecb665ce1"},{"color":"Teal","size":"L","sku":"TEAL-L","stock":9,"cost":200,"_id":"69c23a46b16306eecb665ce2"}],"isFeatured":true,"createdAt":"2026-03-24T07:16:22.654Z","updatedAt":"2026-03-25T03:43:40.226Z","__v":0,"id":"69c23a46b16306eecb665cdf"},{"_id":"69c23a46b16306eecb665ce4","name":"Grey Sweater","description":"Cozy grey sweater made from premium materials","price":"249.99","cost":"120","images":["https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80"],"variants":[{"color":"Grey","size":"XS","sku":"GREY-XS","stock":6,"cost":120,"_id":"69c23a46b16306eecb665ce5"},{"color":"Grey","size":"S","sku":"GREY-S","stock":10,"cost":120,"_id":"69c23a46b16306eecb665ce6"},{"color":"Grey","size":"M","sku":"GREY-M","stock":14,"cost":120,"_id":"69c23a46b16306eecb665ce7"},{"color":"Grey","size":"L","sku":"GREY-L","stock":9,"cost":120,"_id":"69c23a46b16306eecb665ce8"},{"color":"Grey","size":"XL","sku":"GREY-XL","stock":7,"cost":120,"_id":"69c23a46b16306eecb665ce9"}],"isFeatured":true,"createdAt":"2026-03-24T07:16:22.867Z","updatedAt":"2026-03-24T07:16:22.867Z","__v":0,"id":"69c23a46b16306eecb665ce4"},{"_id":"69c23a47b16306eecb665ceb","name":"QIROX Package ","description":"Classic blue hoodie with modern design","price":"320","cost":"140","images":["/uploads/1774347346067-981671507.png"],"variants":[{"color":"Blue","size":"S","sku":"BLUE-S","stock":11,"cost":140,"_id":"69c23a47b16306eecb665cec"},{"color":"Blue","size":"M","sku":"BLUE-M","stock":16,"cost":140,"_id":"69c23a47b16306eecb665ced"},{"color":"Blue","size":"L","sku":"BLUE-L","stock":13,"cost":140,"_id":"69c23a47b16306eecb665cee"}],"isFeatured":true,"createdAt":"2026-03-24T07:16:23.079Z","updatedAt":"2026-03-24T10:15:57.609Z","__v":0,"id":"69c23a47b16306eecb665ceb"}]
+[API] Checking user by phone: 567891011
+3:57:55 AM [express] GET /api/admin/users/by-phone/567891011 200 in 212ms :: {"id":"69c35c49067c5ee69b079423","role":"admin","isActive":true,"name":"Qirox Studio"}
+[AUTH] Final clean input for login: "567891011"
+[AUTH] User found: Yes (admin)
+[AUTH] Staff check for login: ID=69c35c49067c5ee69b079423, Role=admin, isStaff=true, isActive=true
+[AUTH] Password mismatch for staff login: 567891011. Input: 182009, Expected: 48ed720fc6f07eebfb7761367ef789ce3b7bbeca14c6aab0ab127f71ba9a854ee2946dd4eefb816961fdfe27d068efc92583715f366338ec5f16f1e0ffbe272c.b4ce056cefd24222260d672ed779ab1b
+3:57:57 AM [express] POST /api/auth/login 401 in 253ms
+[AUTH] Final clean input for login: "567891011"
+[AUTH] User found: Yes (admin)
+[AUTH] Staff check for login: ID=69c35c49067c5ee69b079423, Role=admin, isStaff=true, isActive=true
+[AUTH] Password match for staff login: 567891011
+3:58:00 AM [express] POST /api/auth/login 200 in 253ms :: {"_id":"69c35c49067c5ee69b079423","username":"567891011","password":"48ed720fc6f07eebfb7761367ef789ce3b7bbeca14c6aab0ab127f71ba9a854ee2946dd4eefb816961fdfe27d068efc92583715f366338ec5f16f1e0ffbe272c.b4ce056cefd24222260d672ed779ab1b","role":"admin","permissions":["orders.view","orders.edit","orders.refund","products.view","products.edit","customers.view","wallet.adjust","reports.view","staff.manage","pos.access","settings.manage"],"loginType":"both","isActive":true,"mustChangePassword":false,"name":"Qirox Studio","email":"qiroxsystem@gmail.com","phone":"567891011","walletBalance":"0","addresses":[],"createdAt":"2026-03-25T03:53:45.873Z","updatedAt":"2026-03-25T03:53:45.873Z","__v":0,"id":"69c35c49067c5ee69b079423","redirectTo":"/admin"}
+3:58:01 AM [express] GET /api/admin/stats 200 in 427ms :: {"totalSales":1207.5,"netProfit":120.75,"dailySales":230,"monthlySales":1207.5,"totalOrders":9,"totalProducts":4,"totalCustomers":1,"topProducts":[{"name":"Teal Jacket","count":8,"revenue":800},{"name":"Burgundy Hoodie","count":1,"revenue":250}],"chartData":[{"month":"أكتوبر","sales":0,"orders":0},{"month":"نوفمبر","sales":0,"orders":0},{"month":"ديسمبر","sales":0,"orders":0},{"month":"يناير","sales":0,"orders":0},{"month":"فبراير","sales":0,"orders":0},{"month":"مارس","sales":1207.5,"orders":9}]}
+3:58:01 AM [express] GET /api/orders 200 in 411ms :: [{"_id":"69c2769176786c347f5f36bb","userId":"69c26554211467d35cac4166","type":"online","cashierId":"69c26554211467d35cac4166","status":"new","total":"287.50","subtotal":"250.00","vatAmount":"37.50","shippingCost":"0.00","tapCommission":"5.75","netProfit":"28.75","discountAmount":"0.00","items":[{"productId":"69c23a46b16306eecb665cd9","variantSku":"BURG-M","quantity":1,"price":250,"cost":150,"title":"Burgundy Hoodie","_id":"69c2769176786c347f5f36bc"}],"shippingMethod":"delivery","paymentMethod":"bank_transfer","paymentStatus":"pending","returnRequest":{"status":"none"},"createdAt":"2026-03-24T11:33:37.260Z","updatedAt":"2026-03-24T11:33:37.260Z","__v":0,"id":"69c2769176786c347f5f36bb"},{"_id":"69c2797be569840f41757354","userId":"69c26554211467d35cac4166","type":"online","cashierId":"69c26554211467d35cac4166","status":"new","total":"115.00","subtotal":"100.00","vatAmount":"15.00","shippingCost":"0.00","tapCommission":"2.30","netProfit":"11.50","discountAmount":"0.00","items":[{"productId":"69c23a46b16306eecb665cdf","variantSku":"TEAL-M","quantity":1,"price":100,"cost":70,"title":"Teal Jacket","_id":"69c2797be569840f41757355"}],"shippingMethod":"delivery","paymentMethod":"tamara","paymentStatus":"pending","returnRequest":{"status":"none"},"createdAt":"2026-03-24T11:46:03.933Z","updatedAt":"2026-03-24T11:46:03.933Z","__v":0,"id":"69c2797be569840f41757354"},{"_id":"69c27982e569840f4175736a","userId":"69c26554211467d35cac4166","type":"online","cashierId":"69c26554211467d35cac4166","status":"new","total":"115.00","subtotal":"100.00","vatAmount":"15.00","shippingCost":"0.00","tapCommission":"2.30","netProfit":"11.50","discountAmount":"0.00","items":[{"productId":"69c23a46b16306eecb665cdf","variantSku":"TEAL-M","quantity":1,"price":100,"cost":70,"title":"Teal Jacket","_id":"69c27982e569840f4175736b"}],"shippingMethod":"delivery","paymentMethod":"tap","paymentStatus":"pending","returnRequest":{"status":"none"},"createdAt":"2026-03-24T11:46:10.603Z","updatedAt":"2026-03-24T11:46:10.603Z","__v":0,"id":"69c27982e569840f4175736a"},{"_id":"69c27994e569840f41757380","userId":"69c26554211467d35cac4166","type":"online","cashierId":"69c26554211467d35cac4166","status":"new","total":"115.00","subtotal":"100.00","vatAmount":"15.00","shippingCost":"0.00","tapCommission":"2.30","netProfit":"11.50","discountAmount":"0.00","items":[{"productId":"69c23a46b16306eecb665cdf","variantSku":"TEAL-M","quantity":1,"price":100,"cost":70,"title":"Teal","_id":"69c27994e569840f41757381"}],"shippingMethod":"delivery","paymentMethod":"tabby","paymentStatus":"pending","returnRequest":{"status":"none"},"createdAt":"2026-03-24T11:46:28.016Z","updatedAt":"2026-03-24T11:46:28.016Z","__v":0,"id":"69c27994e569840f41757380"},{"_id":"69c27998e569840f41757396","userId":"69c26554211467d35cac4166","type":"online","cashierId":"69c26554211467d35cac4166","status":"new","total":"115.00","subtotal":"100.00","vatAmount":"15.00","shippingCost":"0.00","tapCommission":"2.30","netProfit":"11.50","discountAmount":"0.00","items":[{"productId":"69c23a46b16306eecb665cdf","variantSku":"TEAL-M","quantity":1,"price":100,"cost":70,"title":"Teal","_id":"69c27998e569840f41757397"}],"shippingMethod":"delivery","paymentMethod":"stc_pay","paymentStatus":"pending","returnRequest":{"status":"none"},"createdAt":"2026-03-24T11:46:32.380Z","updatedAt":"2026-03-24T11:46:32.380Z","__v":0,"id":"69c27998e569840f41757396"},{"_id":"69c28a8619586ca9d6081763","userId":"69c26554211467d35cac4166","type":"online","cashierId":"69c26554211467d35cac4166","status":"new","total":"115.00","subtotal":"100.00","vatAmount":"15.00","shippingCost":"0.00","tapCommission":"2.30","netProfit":"11.50","discountAmount":"0.00","items":[{"productId":"69c23a46b16306eecb665cdf","variantSku":"TEAL-M","quantity":1,"price":100,"cost":70,"title":"Teal Jacket","_id":"69c28a8619586ca9d6081764"}],"shippingMethod":"delivery","paymentMethod":"tabby","paymentStatus":"pending","returnRequest":{"status":"none"},"createdAt":"2026-03-24T12:58:46.665Z","updatedAt":"2026-03-24T12:58:46.665Z","__v":0,"id":"69c28a8619586ca9d6081763"},{"_id":"69c28aba19586ca9d608179b","userId":"69c26554211467d35cac4166","type":"online","cashierId":"69c26554211467d35cac4166","status":"new","total":"115.00","subtotal":"100.00","vatAmount":"15.00","shippingCost":"0.00","tapCommission":"2.30","netProfit":"11.50","discountAmount":"0.00","items":[{"productId":"69c23a46b16306eecb665cdf","variantSku":"default","quantity":1,"price":100,"cost":70,"title":"Teal Jacket","_id":"69c28aba19586ca9d608179c"}],"shippingMethod":"delivery","paymentMethod":"tap","paymentStatus":"pending","returnRequest":{"status":"none"},"createdAt":"2026-03-24T12:59:38.548Z","updatedAt":"2026-03-24T12:59:38.548Z","__v":0,"id":"69c28aba19586ca9d608179b"},{"_id":"69c359ec19ea0fe99de8470a","userId":"69c26554211467d35cac4166","type":"online","cashierId":"69c26554211467d35cac4166","status":"new","total":"115.00","subtotal":"100.00","vatAmount":"15.00","shippingCost":"0.00","tapCommission":"2.30","netProfit":"11.50","discountAmount":"0.00","items":[{"productId":"69c23a46b16306eecb665cdf","variantSku":"TEAL-L","quantity":1,"price":100,"cost":70,"title":"Teal Jacket","_id":"69c359ec19ea0fe99de8470b"}],"shippingMethod":"delivery","paymentMethod":"tap","paymentStatus":"pending","returnRequest":{"status":"none"},"statusHistory":[],"createdAt":"2026-03-25T03:43:40.664Z","updatedAt":"2026-03-25T03:43:40.664Z","__v":0,"id":"69c359ec19ea0fe99de8470a"},{"_id":"69c35b4719ea0fe99de847dc","userId":"69c26554211467d35cac4166","type":"online","cashierId":"69c26554211467d35cac4166","status":"new","total":"115.00","subtotal":"100.00","vatAmount":"15.00","shippingCost":"0.00","tapCommission":"2.30","netProfit":"11.50","discountAmount":"0.00","items":[{"productId":"69c23a46b16306eecb665cdf","variantSku":"default","quantity":1,"price":100,"cost":70,"title":"Teal Jacket","_id":"69c35b4719ea0fe99de847dd"}],"shippingMethod":"delivery","paymentMethod":"tamara","paymentStatus":"pending","returnRequest":{"status":"none"},"statusHistory":[],"createdAt":"2026-03-25T03:49:27.241Z","updatedAt":"2026-03-25T03:49:27.241Z","__v":0,"id":"69c35b4719ea0fe99de847dc"}]
+3:58:14 AM [express] POST /api/ai/insights 200 in 4816ms :: {"overview":"أداء المتجر جيد مع زيادة في الطلبات على المنتجات المميزة.","score":85,"highlights":["زيادة الطلبات على Teal Jacket","تنوع المنتجات المباعة"],"warnings":["عدم وجود طلبات في حالات أخرى غير الجديدة"],"recommendations":[{"title":"تحسين استراتيجيات التسويق","action":"زيادة الحملات الإعلانية للمنتجات الأقل مبيعاً","impact":"high"},{"title":"تحليل سلوك العملاء","action":"جمع بيانات إضافية عن العملاء لفهم احتياجاتهم","impact":"medium"}],"trend":"up"}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m3:58:21 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m
+3:58:22 AM [express] GET /api/categories 200 in 216ms
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m3:58:30 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m [33m(x2)[39m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m3:58:50 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/Orders.tsx, /src/index.css[22m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m3:59:00 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/Orders.tsx, /src/index.css[22m [33m(x2)[39m
