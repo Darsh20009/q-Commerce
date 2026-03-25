@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, Redirect, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -44,17 +44,16 @@ import CashDrawerReport from "@/pages/CashDrawerReport";
 
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
-import { useLocation } from "wouter";
 
 // Protected Route Component
 function ProtectedRoute({ component: Component, permission }: { component: React.ComponentType, permission?: string }) {
   const { user, isLoading } = useAuth();
-  const [, setLocation] = useLocation();
+  const [location] = useLocation();
 
   if (isLoading) return <div className="flex items-center justify-center h-screen"><Loader2 className="animate-spin" /></div>;
   if (!user) {
-    setLocation("/login");
-    return null;
+    const redirect = encodeURIComponent(location);
+    return <Redirect to={`/login?redirect=${redirect}`} />;
   }
 
   if (permission && user.role !== "admin" && (!user.permissions || !user.permissions.includes(permission))) {

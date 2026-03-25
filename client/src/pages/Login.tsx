@@ -8,7 +8,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useLocation, Link } from "wouter";
+import { useLocation, Link, Redirect } from "wouter";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
@@ -23,13 +23,13 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isStaff, setIsStaff] = useState(false);
 
+  // Read ?redirect= from URL
+  const searchParams = new URLSearchParams(window.location.search);
+  const redirectParam = searchParams.get("redirect");
+
   if (user) {
-    // Only redirect if not already at destination
-    const destination = "/";
-    if (window.location.pathname !== destination) {
-      setLocation(destination);
-    }
-    return null;
+    const destination = redirectParam ? decodeURIComponent(redirectParam) : "/";
+    return <Redirect to={destination} />;
   }
 
   const form = useForm<z.infer<typeof loginSchema>>({
@@ -56,13 +56,10 @@ export default function Login() {
           setLocation("/profile?mustChangePassword=true");
           return;
         }
-        // Redirect based on user role
-        const redirectPath = userData?.redirectTo || "/";
-        // Check if we're already at the location to prevent state update loops
-        const currentPath = window.location.pathname;
-        if (currentPath !== redirectPath) {
-          setLocation(redirectPath);
-        }
+        // Use ?redirect= param first, then server-provided redirectTo, then default
+        const fallback = userData?.redirectTo || "/";
+        const destination = redirectParam ? decodeURIComponent(redirectParam) : fallback;
+        setLocation(destination);
       },
     });
   };
