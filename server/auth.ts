@@ -32,9 +32,15 @@ const scryptAsync = promisify(scrypt);
 const MemoryStore = MemoryStoreFactory(session);
 
 export function setupAuth(app: Express) {
-  const sessionSecret = process.env.SESSION_SECRET;
+  let sessionSecret = process.env.SESSION_SECRET;
   if (!sessionSecret || sessionSecret.length < 32) {
-    throw new Error("SESSION_SECRET env var must be set and at least 32 characters");
+    if (process.env.NODE_ENV === "production") {
+      console.error("[FATAL] SESSION_SECRET env var must be set and at least 32 characters in production");
+      process.exit(1);
+    }
+    // In development, generate a random secret as fallback
+    sessionSecret = randomBytes(32).toString("hex");
+    console.warn("[AUTH] SESSION_SECRET not set — using a random secret (sessions will reset on restart)");
   }
 
   const sessionSettings: session.SessionOptions = {
