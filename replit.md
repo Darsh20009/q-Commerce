@@ -83,7 +83,7 @@ Preferred communication style: Simple, everyday language.
 |----------|---------|
 | MONGODB_URI | MongoDB Atlas connection string |
 | PORT | Server port (default: 5000) |
-| SESSION_SECRET | Express session secret |
+| SESSION_SECRET | Express session encryption key |
 | SMTP2GO_API_KEY | Email service API key |
 | SMTP2GO_SENDER | Sender email address |
 | SMTP2GO_SENDER_NAME | Sender display name |
