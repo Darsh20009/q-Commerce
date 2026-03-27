@@ -982,8 +982,63 @@ export async function registerRoutes(
     }
   });
 
-  // Invoices
-  app.get("/api/invoices", checkPermission("reports.view"), async (req, res) => {
+  // Wallet Transactions
+  app.get("/api/wallet/transactions", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const user = req.user as any;
+      const transactions = await storage.getWalletTransactions(user.id);
+      res.json(transactions);
+    } catch (err: any) {
+      console.error("[API] wallet.transactions error:", err?.message);
+      res.json([]);
+    }
+  });
+
+  // Shipping Companies
+  app.get("/api/shipping-companies", async (req, res) => {
+    try {
+      const companies = await storage.getShippingCompanies();
+      res.json(companies);
+    } catch (err: any) {
+      console.error("[API] shipping-companies.list error:", err?.message);
+      res.json([]);
+    }
+  });
+
+  app.post("/api/shipping-companies", checkPermission("settings.manage"), async (req, res) => {
+    try {
+      const company = await storage.createShippingCompany(req.body);
+      res.status(201).json(company);
+    } catch (err: any) {
+      console.error("[API] shipping-companies.create error:", err?.message);
+      res.status(500).json({ message: "خطأ في إنشاء شركة الشحن" });
+    }
+  });
+
+  app.patch("/api/shipping-companies/:id", checkPermission("settings.manage"), async (req, res) => {
+    try {
+      const company = await storage.updateShippingCompany(req.params.id, req.body);
+      res.json(company);
+    } catch (err: any) {
+      console.error("[API] shipping-companies.update error:", err?.message);
+      res.status(500).json({ message: "خطأ في تحديث شركة الشحن" });
+    }
+  });
+
+  app.delete("/api/shipping-companies/:id", checkPermission("settings.manage"), async (req, res) => {
+    try {
+      await storage.deleteShippingCompany(req.params.id);
+      res.json({ ok: true });
+    } catch (err: any) {
+      console.error("[API] shipping-companies.delete error:", err?.message);
+      res.status(500).json({ message: "خطأ في حذف شركة الشحن" });
+    }
+  });
+
+  // Invoices — accessible by all authenticated users (admins see all, others see their own)
+  app.get("/api/invoices", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
     try {
       const user = req.user as any;
       const invoices = await storage.getInvoices(user.role === "admin" ? undefined : user.id);

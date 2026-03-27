@@ -3402,6 +3402,7 @@ const AdminSidebar = ({ activeTab, onTabChange, pendingOrders }: { activeTab: st
         { id: "shifts", label: "إدارة الورديات", icon: Clock },
         { id: "staff", label: "الموظفون", icon: Users },
         { id: "branches", label: "الفروع", icon: Building },
+        { id: "shipping", label: "شركات الشحن", icon: Truck },
       ]
     },
     {
@@ -3550,6 +3551,7 @@ const pageTitles: Record<string, string> = {
   customers:  "قاعدة العملاء",
   coupons:    "أكواد الخصم",
   broadcast:  "إشعارات جماعية",
+  shipping:   "شركات الشحن",
   logs:       "سجل العمليات",
   settings:   "إعدادات المتجر",
 };
@@ -3644,6 +3646,7 @@ export default function Admin() {
                 {activeTab === "orders"    && <OrdersManagement />}
                 {activeTab === "staff"     && <AdminStaff />}
                 {activeTab === "branches"  && <AdminBranches />}
+                {activeTab === "shipping"  && <ShippingCompaniesPanel />}
                 {activeTab === "shifts"    && <ShiftsManagement />}
                 {activeTab === "customers" && <CustomersTable />}
                 {activeTab === "coupons"   && <CouponsTable />}
@@ -3659,6 +3662,206 @@ export default function Admin() {
     </div>
   );
 }
+
+// ─── Shipping Companies Panel ─────────────────────────────────────────────────
+const ShippingCompaniesPanel = () => {
+  const { toast } = useToast();
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<any | null>(null);
+  const [form, setForm] = useState({ name: "", nameEn: "", logo: "", trackingUrl: "", isActive: true });
+
+  const { data: companies = [], isLoading } = useQuery<any[]>({ queryKey: ["/api/shipping-companies"] });
+
+  const saveMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const res = editing
+        ? await apiRequest("PATCH", `/api/shipping-companies/${editing.id}`, data)
+        : await apiRequest("POST", "/api/shipping-companies", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shipping-companies"] });
+      toast({ title: editing ? "تم التحديث" : "تمت الإضافة" });
+      setShowForm(false);
+      setEditing(null);
+      setForm({ name: "", nameEn: "", logo: "", trackingUrl: "", isActive: true });
+    },
+    onError: () => toast({ title: "حدث خطأ", variant: "destructive" }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => { await apiRequest("DELETE", `/api/shipping-companies/${id}`); },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shipping-companies"] });
+      toast({ title: "تم الحذف" });
+    },
+    onError: () => toast({ title: "حدث خطأ", variant: "destructive" }),
+  });
+
+  const openEdit = (c: any) => {
+    setEditing(c);
+    setForm({ name: c.name, nameEn: c.nameEn || "", logo: c.logo || "", trackingUrl: c.trackingUrl || "", isActive: c.isActive !== false });
+    setShowForm(true);
+  };
+
+  const openNew = () => {
+    setEditing(null);
+    setForm({ name: "", nameEn: "", logo: "", trackingUrl: "", isActive: true });
+    setShowForm(true);
+  };
+
+  return (
+    <div className="space-y-6" dir="rtl">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-black text-slate-900">شركات الشحن</h2>
+          <p className="text-xs text-slate-400 mt-0.5">إدارة مزودي خدمة التوصيل</p>
+        </div>
+        <Button onClick={openNew} className="rounded-none font-black text-xs gap-2" size="sm" data-testid="button-add-shipping">
+          <Plus className="w-3.5 h-3.5" />
+          إضافة شركة
+        </Button>
+      </div>
+
+      {showForm && (
+        <Card className="border-primary/20 rounded-none">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-black">{editing ? "تعديل شركة الشحن" : "إضافة شركة جديدة"}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">الاسم بالعربي *</label>
+                <input
+                  value={form.name}
+                  onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                  placeholder="أرامكس"
+                  className="w-full border border-slate-200 rounded-none px-3 py-2 text-sm bg-white focus:outline-none focus:border-primary"
+                  data-testid="input-shipping-name"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">الاسم بالإنجليزي</label>
+                <input
+                  value={form.nameEn}
+                  onChange={e => setForm(f => ({ ...f, nameEn: e.target.value }))}
+                  placeholder="Aramex"
+                  className="w-full border border-slate-200 rounded-none px-3 py-2 text-sm bg-white focus:outline-none focus:border-primary"
+                  data-testid="input-shipping-name-en"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">رابط الشعار</label>
+                <input
+                  value={form.logo}
+                  onChange={e => setForm(f => ({ ...f, logo: e.target.value }))}
+                  placeholder="https://..."
+                  className="w-full border border-slate-200 rounded-none px-3 py-2 text-sm bg-white focus:outline-none focus:border-primary"
+                  data-testid="input-shipping-logo"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">رابط التتبع</label>
+                <input
+                  value={form.trackingUrl}
+                  onChange={e => setForm(f => ({ ...f, trackingUrl: e.target.value }))}
+                  placeholder="https://track.aramex.com/?{tracking}"
+                  className="w-full border border-slate-200 rounded-none px-3 py-2 text-sm bg-white focus:outline-none focus:border-primary"
+                  data-testid="input-shipping-tracking"
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setForm(f => ({ ...f, isActive: !f.isActive }))}
+                className={`w-9 h-5 rounded-full transition-colors ${form.isActive ? "bg-emerald-500" : "bg-slate-300"}`}
+                data-testid="toggle-shipping-active"
+              >
+                <span className={`block w-4 h-4 bg-white rounded-full shadow transition-transform mx-0.5 ${form.isActive ? "translate-x-4" : "translate-x-0"}`} />
+              </button>
+              <span className="text-xs text-slate-600">{form.isActive ? "مفعّل" : "معطّل"}</span>
+            </div>
+            <div className="flex items-center gap-2 pt-2">
+              <Button
+                size="sm"
+                className="rounded-none font-black text-xs"
+                onClick={() => saveMutation.mutate(form)}
+                disabled={!form.name.trim() || saveMutation.isPending}
+                data-testid="button-save-shipping"
+              >
+                {saveMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                حفظ
+              </Button>
+              <Button size="sm" variant="ghost" className="rounded-none text-xs" onClick={() => setShowForm(false)}>إلغاء</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+        </div>
+      ) : companies.length === 0 ? (
+        <div className="text-center py-16 text-slate-400">
+          <Truck className="w-10 h-10 mx-auto mb-3 opacity-30" />
+          <p className="text-sm font-bold">لا توجد شركات شحن بعد</p>
+          <p className="text-xs mt-1">أضف أول شركة شحن لتبدأ</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {companies.map((c: any) => (
+            <Card key={c.id} className="border-slate-200 rounded-none" data-testid={`card-shipping-${c.id}`}>
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    {c.logo ? (
+                      <img src={c.logo} alt={c.name} className="w-10 h-10 object-contain rounded-lg border border-slate-100 bg-white p-1 shrink-0" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                        <Truck className="w-5 h-5 text-slate-400" />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="font-black text-sm text-slate-900 truncate">{c.name}</p>
+                      {c.nameEn && <p className="text-xs text-slate-400 truncate">{c.nameEn}</p>}
+                      <Badge className={`rounded-none text-[9px] font-bold mt-1 ${c.isActive !== false ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-600"}`}>
+                        {c.isActive !== false ? "مفعّل" : "معطّل"}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      onClick={() => openEdit(c)}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 transition-all"
+                      data-testid={`button-edit-shipping-${c.id}`}
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => deleteMutation.mutate(c.id)}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                      data-testid={`button-delete-shipping-${c.id}`}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+                {c.trackingUrl && (
+                  <p className="text-[10px] text-slate-400 mt-2 truncate font-mono">
+                    {c.trackingUrl}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 // ─── Broadcast Panel ──────────────────────────────────────────────────────────
 const BroadcastPanel = () => {

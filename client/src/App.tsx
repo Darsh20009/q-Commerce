@@ -38,6 +38,7 @@ import AdminBanners from "@/pages/AdminBanners";
 
 import AdminAuditLogs from "@/pages/AdminAuditLogs";
 import AdminRoles from "@/pages/AdminRoles";
+import AdminShippingCompanies from "@/pages/AdminShippingCompanies";
 import POS from "@/pages/POS";
 import CashDrawer from "@/pages/CashDrawer";
 import CashDrawerReport from "@/pages/CashDrawerReport";
@@ -119,6 +120,9 @@ function Router() {
       </Route>
       <Route path="/admin/inventory">
         <ProtectedRoute component={AdminBranchInventory} permission="settings.manage" />
+      </Route>
+      <Route path="/admin/shipping">
+        <ProtectedRoute component={AdminShippingCompanies} permission="settings.manage" />
       </Route>
 
       <Route path="/pos">
