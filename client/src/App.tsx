@@ -46,6 +46,7 @@ import CashDrawer from "@/pages/CashDrawer";
 import CashDrawerReport from "@/pages/CashDrawerReport";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
+import { PWAPrompt } from "@/components/PWAPrompt";
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error?: Error }> {
   constructor(props: { children: ReactNode }) {
@@ -192,6 +193,7 @@ function AppContent() {
     <div dir={language === 'ar' ? 'rtl' : 'ltr'} lang={language}>
       <ErrorBoundary>
         <Router />
+        <PWAPrompt />
       </ErrorBoundary>
     </div>
   );
