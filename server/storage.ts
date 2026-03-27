@@ -1,5 +1,5 @@
-import type { User, InsertUser, Product, InsertProduct, Order, InsertOrder, Category, InsertCategory, WalletTransaction, InsertWalletTransaction, OrderStatus, ActivityLog, InsertActivityLog, Coupon, InsertCoupon, Branch, InsertBranch, Banner, InsertBanner, CashShift, InsertCashShift, BranchInventory, ShippingCompany, InsertShippingCompany, AuditLog, InsertAuditLog, Role, InsertRole, StockTransfer, InsertStockTransfer, Invoice, InsertInvoice } from "@shared/schema";
-import { UserModel, ProductModel, OrderModel, CategoryModel, WalletTransactionModel, ActivityLogModel, CouponModel, BranchModel, BannerModel, CashShiftModel, ShippingCompanyModel, AuditLogModel, RoleModel, StockTransferModel, InvoiceModel, StoreSettingsModel } from "./models";
+import type { User, InsertUser, Product, InsertProduct, Order, InsertOrder, Category, InsertCategory, WalletTransaction, InsertWalletTransaction, OrderStatus, ActivityLog, InsertActivityLog, Coupon, InsertCoupon, Branch, InsertBranch, Banner, InsertBanner, CashShift, InsertCashShift, BranchInventory, ShippingCompany, InsertShippingCompany, AuditLog, InsertAuditLog, Role, InsertRole, StockTransfer, InsertStockTransfer, Invoice, InsertInvoice, WishlistItem, InsertWishlistItem, ProductReview, InsertProductReview } from "@shared/schema";
+import { UserModel, ProductModel, OrderModel, CategoryModel, WalletTransactionModel, ActivityLogModel, CouponModel, BranchModel, BannerModel, CashShiftModel, ShippingCompanyModel, AuditLogModel, RoleModel, StockTransferModel, InvoiceModel, StoreSettingsModel, WishlistItemModel, ProductReviewModel } from "./models";
 
 export interface IStorage {
   // Users
@@ -104,6 +104,20 @@ export interface IStorage {
   // Store Settings
   getStoreSettings(): Promise<any>;
   updateStoreSettings(settings: any): Promise<any>;
+
+  // Wishlist
+  getWishlist(userId: string): Promise<WishlistItem[]>;
+  getWishlistProductIds(userId: string): Promise<string[]>;
+  addToWishlist(userId: string, productId: string): Promise<WishlistItem>;
+  removeFromWishlist(userId: string, productId: string): Promise<void>;
+
+  // Product Reviews
+  getProductReviews(productId: string): Promise<ProductReview[]>;
+  createProductReview(review: InsertProductReview): Promise<ProductReview>;
+  getUserReviewForProduct(userId: string, productId: string): Promise<ProductReview | undefined>;
+
+  // Low Stock
+  getLowStockProducts(threshold?: number): Promise<Product[]>;
 }
 
 export class MongoDBStorage implements IStorage {
@@ -642,6 +656,55 @@ export class MongoDBStorage implements IStorage {
       { new: true, upsert: true }
     ).lean();
     return { ...settings, id: (settings as any)._id?.toString() };
+  }
+
+  // Wishlist
+  async getWishlist(userId: string): Promise<WishlistItem[]> {
+    const items = await WishlistItemModel.find({ userId }).sort({ createdAt: -1 }).lean();
+    return items.map(i => ({ ...i, id: (i as any)._id.toString() } as any));
+  }
+
+  async getWishlistProductIds(userId: string): Promise<string[]> {
+    const items = await WishlistItemModel.find({ userId }, { productId: 1 }).lean();
+    return items.map((i: any) => i.productId);
+  }
+
+  async addToWishlist(userId: string, productId: string): Promise<WishlistItem> {
+    const existing = await WishlistItemModel.findOne({ userId, productId });
+    if (existing) return { ...existing.toObject(), id: (existing as any)._id.toString() } as any;
+    const item = await WishlistItemModel.create({ userId, productId });
+    return { ...item.toObject(), id: (item as any)._id.toString() } as any;
+  }
+
+  async removeFromWishlist(userId: string, productId: string): Promise<void> {
+    await WishlistItemModel.deleteOne({ userId, productId });
+  }
+
+  // Product Reviews
+  async getProductReviews(productId: string): Promise<ProductReview[]> {
+    const reviews = await ProductReviewModel.find({ productId }).sort({ createdAt: -1 }).lean();
+    return reviews.map(r => ({ ...r, id: (r as any)._id.toString() } as any));
+  }
+
+  async createProductReview(insertReview: InsertProductReview): Promise<ProductReview> {
+    const review = await ProductReviewModel.create(insertReview);
+    return { ...review.toObject(), id: (review as any)._id.toString() } as any;
+  }
+
+  async getUserReviewForProduct(userId: string, productId: string): Promise<ProductReview | undefined> {
+    const review = await ProductReviewModel.findOne({ userId, productId }).lean();
+    return review ? { ...review, id: (review as any)._id.toString() } as any : undefined;
+  }
+
+  // Low Stock
+  async getLowStockProducts(threshold: number = 5): Promise<Product[]> {
+    const products = await ProductModel.find().lean();
+    return products
+      .filter(p => {
+        const total = ((p as any).variants || []).reduce((s: number, v: any) => s + (v.stock || 0), 0);
+        return total <= threshold;
+      })
+      .map(p => ({ ...p, id: (p as any)._id.toString() } as any));
   }
 }
 

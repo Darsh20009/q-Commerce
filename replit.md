@@ -67,7 +67,12 @@ Preferred communication style: Simple, everyday language.
 
 ### Key Features
 - **Storefront**: Product catalog, cart, checkout with multiple Saudi payment methods
+- **Wishlist**: Add/remove products to wishlist with heart button on cards; accessible at `/profile/wishlist`
+- **Product Reviews**: Star ratings (1–5) + comments per product; average rating shown on product detail page
 - **Admin Dashboard**: Analytics, product management, order management, staff roles (RBAC)
+- **Low Stock Alerts**: Admin overview panel shows products with stock ≤ 5 units automatically
+- **Shipping Companies**: Full CRUD admin panel for shipping providers (`/api/shipping-companies`)
+- **Invoice PDF**: Print/download ZATCA-compliant invoices from the customer profile invoices page
 - **POS System**: Cashier interface, cash drawer management, branch inventory
 - **Multi-branch**: Branch-specific inventory tracking with map view
 - **PWA**: Service worker, web app manifest, installable

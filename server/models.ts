@@ -347,6 +347,27 @@ const storeSettingsSchema = new Schema(
   { timestamps: true }
 );
 
+const wishlistItemSchema = new Schema(
+  {
+    userId: { type: String, required: true },
+    productId: { type: String, required: true },
+  },
+  { timestamps: true }
+);
+
+const productReviewSchema = new Schema(
+  {
+    productId: { type: String, required: true },
+    userId: { type: String, required: true },
+    userName: { type: String, default: "" },
+    rating: { type: Number, required: true, min: 1, max: 5 },
+    comment: { type: String, default: "" },
+  },
+  { timestamps: true }
+);
+
+export const WishlistItemModel = mongoose.model("WishlistItem", wishlistItemSchema);
+export const ProductReviewModel = mongoose.model("ProductReview", productReviewSchema);
 export const NotificationModel = mongoose.model("Notification", notificationSchema);
 export const PushSubscriptionModel = mongoose.model("PushSubscription", pushSubscriptionSchema);
 export const StoreSettingsModel = mongoose.model("StoreSettings", storeSettingsSchema);

@@ -344,9 +344,61 @@ const OverviewPanel = memo(() => {
           )}
         </Card>
       </div>
+
+      {/* Low Stock Alert */}
+      <LowStockWidget />
     </div>
   );
 });
+
+const LowStockWidget = () => {
+  const { data: lowStock = [], isLoading } = useQuery<any[]>({
+    queryKey: ["/api/admin/low-stock"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/low-stock?threshold=5");
+      return res.ok ? res.json() : [];
+    },
+  });
+
+  if (isLoading || lowStock.length === 0) return null;
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+      <Card className="rounded-[2rem] border-none shadow-sm bg-white overflow-hidden">
+        <div className="flex items-center gap-3 px-5 pt-5 pb-3">
+          <div className="p-2 bg-amber-50 rounded-xl">
+            <AlertCircle className="w-4 h-4 text-amber-500" />
+          </div>
+          <div>
+            <h3 className="text-sm font-black text-slate-900">تنبيه: مخزون منخفض</h3>
+            <p className="text-[10px] text-slate-400">{lowStock.length} منتج بمخزون أقل من 5 وحدات</p>
+          </div>
+        </div>
+        <div className="px-5 pb-5 space-y-2">
+          {lowStock.slice(0, 5).map((p: any) => {
+            const totalStock = (p.variants || []).reduce((s: number, v: any) => s + (v.stock || 0), 0);
+            return (
+              <div key={p.id} className="flex items-center gap-3 p-2 rounded-xl bg-amber-50/60" data-testid={`low-stock-${p.id}`}>
+                {p.images?.[0] && (
+                  <img src={p.images[0]} alt={p.name} className="w-9 h-9 rounded-lg object-cover shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-black text-xs text-slate-900 truncate">{p.name}</p>
+                </div>
+                <Badge className={`rounded-lg text-[10px] font-bold shrink-0 ${totalStock === 0 ? "bg-red-100 text-red-600" : "bg-amber-100 text-amber-700"}`}>
+                  {totalStock === 0 ? "نفذ" : `${totalStock} وحدة`}
+                </Badge>
+              </div>
+            );
+          })}
+          {lowStock.length > 5 && (
+            <p className="text-[10px] text-slate-400 text-center pt-1">و {lowStock.length - 5} منتج آخر</p>
+          )}
+        </div>
+      </Card>
+    </motion.div>
+  );
+};
 
 const EditProductDialog = memo(({ product, categories, open, onOpenChange }: any) => {
   const { toast } = useToast();

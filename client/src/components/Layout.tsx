@@ -1,7 +1,7 @@
 import logoImg from "@assets/QIROX_LOGO_1774316442270.png";
 import { ReactNode, useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { ShoppingBag, User, Menu, LogOut, Sun, Moon, Phone, Mail, Instagram, Twitter, Download, Globe, Check, Wallet, Home, Package, LayoutDashboard, ChevronRight, X, Zap, Star, HelpCircle, Shield, Settings2, Tag } from "lucide-react";
+import { ShoppingBag, User, Menu, LogOut, Sun, Moon, Phone, Mail, Instagram, Twitter, Download, Globe, Check, Wallet, Home, Package, LayoutDashboard, ChevronRight, X, Zap, Star, HelpCircle, Shield, Settings2, Tag, Heart } from "lucide-react";
 import { SiTiktok, SiSnapchat, SiWhatsapp, SiX } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
@@ -399,6 +399,13 @@ export function Layout({ children }: { children: ReactNode }) {
                       <DropdownMenuItem className={`cursor-pointer gap-3 p-3 text-[10px] font-black uppercase tracking-widest hover:bg-foreground hover:text-background transition-all rounded-none ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
                         <ShoppingBag className="h-4 w-4 opacity-40" />
                         {t('myOrders') || 'طلباتي'}
+                      </DropdownMenuItem>
+                    </Link>
+
+                    <Link href="/profile/wishlist">
+                      <DropdownMenuItem className={`cursor-pointer gap-3 p-3 text-[10px] font-black uppercase tracking-widest hover:bg-foreground hover:text-background transition-all rounded-none ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                        <Heart className="h-4 w-4 opacity-40" />
+                        {language === 'ar' ? 'قائمة الأمنيات' : 'Wishlist'}
                       </DropdownMenuItem>
                     </Link>
                     

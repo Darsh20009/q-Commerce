@@ -39,6 +39,7 @@ import AdminBanners from "@/pages/AdminBanners";
 import AdminAuditLogs from "@/pages/AdminAuditLogs";
 import AdminRoles from "@/pages/AdminRoles";
 import AdminShippingCompanies from "@/pages/AdminShippingCompanies";
+import ProfileWishlist from "@/pages/ProfileWishlist";
 import POS from "@/pages/POS";
 import CashDrawer from "@/pages/CashDrawer";
 import CashDrawerReport from "@/pages/CashDrawerReport";
@@ -82,6 +83,9 @@ function Router() {
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/profile">
         <ProtectedRoute component={Profile} />
+      </Route>
+      <Route path="/profile/wishlist">
+        <ProtectedRoute component={ProfileWishlist} />
       </Route>
       <Route path="/profile/invoices">
         <ProtectedRoute component={ProfileInvoices} />

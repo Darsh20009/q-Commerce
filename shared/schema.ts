@@ -333,6 +333,25 @@ export const insertInvoiceSchema = z.object({
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
 export type Invoice = InsertInvoice & { _id: string; id: string; createdAt: Date };
 
+// Wishlist Schema
+export const insertWishlistItemSchema = z.object({
+  userId: z.string(),
+  productId: z.string(),
+});
+export type InsertWishlistItem = z.infer<typeof insertWishlistItemSchema>;
+export type WishlistItem = InsertWishlistItem & { _id: string; id: string; createdAt: Date };
+
+// Product Review Schema
+export const insertProductReviewSchema = z.object({
+  productId: z.string(),
+  userId: z.string(),
+  userName: z.string().default(""),
+  rating: z.number().min(1).max(5),
+  comment: z.string().default(""),
+});
+export type InsertProductReview = z.infer<typeof insertProductReviewSchema>;
+export type ProductReview = InsertProductReview & { _id: string; id: string; createdAt: Date };
+
 // API Types
 export type LoginRequest = { username: string; password: string };
 export type AuthResponse = User;

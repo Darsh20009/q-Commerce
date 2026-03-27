@@ -1036,6 +1036,92 @@ export async function registerRoutes(
     }
   });
 
+  // ─── Wishlist ──────────────────────────────────────────────────────────────
+  app.get("/api/wishlist/ids", async (req, res) => {
+    if (!req.isAuthenticated()) return res.json([]);
+    try {
+      const user = req.user as any;
+      const ids = await storage.getWishlistProductIds(user.id);
+      res.json(ids);
+    } catch (err: any) {
+      res.json([]);
+    }
+  });
+
+  app.get("/api/wishlist", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const user = req.user as any;
+      const items = await storage.getWishlist(user.id);
+      const products = await Promise.all(items.map(i => storage.getProduct(i.productId)));
+      res.json(products.filter(Boolean));
+    } catch (err: any) {
+      res.json([]);
+    }
+  });
+
+  app.post("/api/wishlist", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const user = req.user as any;
+      await storage.addToWishlist(user.id, req.body.productId);
+      res.json({ ok: true });
+    } catch (err: any) {
+      res.status(500).json({ message: "خطأ في إضافة المنتج للمفضلة" });
+    }
+  });
+
+  app.delete("/api/wishlist/:productId", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const user = req.user as any;
+      await storage.removeFromWishlist(user.id, req.params.productId);
+      res.json({ ok: true });
+    } catch (err: any) {
+      res.status(500).json({ message: "خطأ في إزالة المنتج من المفضلة" });
+    }
+  });
+
+  // ─── Product Reviews ────────────────────────────────────────────────────────
+  app.get("/api/products/:id/reviews", async (req, res) => {
+    try {
+      const reviews = await storage.getProductReviews(req.params.id);
+      res.json(reviews);
+    } catch (err: any) {
+      res.json([]);
+    }
+  });
+
+  app.post("/api/products/:id/reviews", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const user = req.user as any;
+      const existing = await storage.getUserReviewForProduct(user.id, req.params.id);
+      if (existing) return res.status(409).json({ message: "لقد قمت بتقييم هذا المنتج مسبقاً" });
+      const review = await storage.createProductReview({
+        productId: req.params.id,
+        userId: user.id,
+        userName: user.name || "عميل",
+        rating: Number(req.body.rating),
+        comment: req.body.comment || "",
+      });
+      res.status(201).json(review);
+    } catch (err: any) {
+      res.status(500).json({ message: "خطأ في إضافة التقييم" });
+    }
+  });
+
+  // ─── Low Stock ───────────────────────────────────────────────────────────────
+  app.get("/api/admin/low-stock", checkPermission("products.view"), async (req, res) => {
+    try {
+      const threshold = parseInt(req.query.threshold as string) || 5;
+      const products = await storage.getLowStockProducts(threshold);
+      res.json(products);
+    } catch (err: any) {
+      res.json([]);
+    }
+  });
+
   // Invoices — accessible by all authenticated users (admins see all, others see their own)
   app.get("/api/invoices", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
