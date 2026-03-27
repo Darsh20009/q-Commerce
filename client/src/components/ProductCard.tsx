@@ -138,6 +138,11 @@ export function ProductCard({ product }: ProductCardProps) {
               {product.name}
             </h3>
             <p className="text-xs text-muted-foreground font-bold">{Number(product.price).toLocaleString()} {t('currency')}</p>
+            {(product as any).vendorId && (
+              <p className="text-[9px] font-bold text-primary/70 uppercase tracking-widest mt-1 flex items-center justify-center gap-0.5">
+                🏪 {language === 'ar' ? 'بائع مستقل' : 'Seller'}
+              </p>
+            )}
           </CardContent>
         </Card>
       </Link>

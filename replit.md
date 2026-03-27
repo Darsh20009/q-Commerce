@@ -76,11 +76,14 @@ Preferred communication style: Simple, everyday language.
 - **POS System**: Cashier interface, cash drawer management, branch inventory
 - **Multi-branch**: Branch-specific inventory tracking with map view
 - **PWA**: Service worker, web app manifest, installable
+- **Multi-Vendor Marketplace**: Sellers apply at `/vendor/apply`, manage store at `/vendor/dashboard`; admin approves/rejects via "البائعون" tab; public store pages at `/stores/:id`; products tagged with "بائع مستقل" badge; vendor role added to userRoles
 
-### User Roles & Permissions
-- **admin**: Full access to all features
+### User Roles
+- **admin**: Full access to all features including vendor management
 - **employee**: Configurable permissions (pos.access, staff.manage, settings.manage, reports.view, etc.)
-- **customer**: Storefront, cart, orders, profile
+- **vendor**: Approved sellers - access to vendor dashboard, product/order management
+- **customer**: Storefront, cart, orders, profile, wishlist
+
 
 ## Environment Variables
 

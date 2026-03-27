@@ -41,6 +41,28 @@ const cashShiftSchema = new Schema<CashShift>(
   { timestamps: true }
 );
 
+const vendorSchema = new Schema(
+  {
+    userId: { type: String, required: true },
+    storeName: { type: String, required: true },
+    storeNameEn: { type: String, default: "" },
+    description: { type: String, default: "" },
+    logo: { type: String, default: "" },
+    coverImage: { type: String, default: "" },
+    status: { type: String, enum: ["pending", "active", "suspended"], default: "pending" },
+    commissionRate: { type: Number, default: 10 },
+    phone: { type: String, default: "" },
+    email: { type: String, default: "" },
+    bankIBAN: { type: String, default: "" },
+    totalSales: { type: Number, default: 0 },
+    pendingPayout: { type: Number, default: 0 },
+    rating: { type: Number, default: 0 },
+    reviewCount: { type: Number, default: 0 },
+    tags: { type: [String], default: [] },
+  },
+  { timestamps: true }
+);
+
 const productSchema = new Schema<Product>(
   {
     name: { type: String, required: true },
@@ -50,6 +72,7 @@ const productSchema = new Schema<Product>(
     images: [String],
     categoryId: { type: String, default: "" },
     categoryIds: { type: [String], default: [] },
+    vendorId: { type: String, default: null },
     variants: [{
       color: String,
       size: String,
@@ -366,6 +389,7 @@ const productReviewSchema = new Schema(
   { timestamps: true }
 );
 
+export const VendorModel = mongoose.model("Vendor", vendorSchema);
 export const WishlistItemModel = mongoose.model("WishlistItem", wishlistItemSchema);
 export const ProductReviewModel = mongoose.model("ProductReview", productReviewSchema);
 export const NotificationModel = mongoose.model("Notification", notificationSchema);

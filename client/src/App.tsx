@@ -41,6 +41,10 @@ import AdminRoles from "@/pages/AdminRoles";
 import AdminShippingCompanies from "@/pages/AdminShippingCompanies";
 import ProfileWishlist from "@/pages/ProfileWishlist";
 import POS from "@/pages/POS";
+import VendorApply from "@/pages/VendorApply";
+import VendorDashboard from "@/pages/VendorDashboard";
+import VendorStore from "@/pages/VendorStore";
+import VendorsList from "@/pages/VendorsList";
 import CashDrawer from "@/pages/CashDrawer";
 import CashDrawerReport from "@/pages/CashDrawerReport";
 
@@ -143,6 +147,14 @@ function Router() {
       <Route path="/payment/tabby-checkout" component={TabbyCheckout} />
       <Route path="/payment/stc-checkout" component={STCCheckout} />
       <Route path="/terms" component={Terms} />
+      <Route path="/stores" component={VendorsList} />
+      <Route path="/stores/:id" component={VendorStore} />
+      <Route path="/vendor/apply">
+        <ProtectedRoute component={VendorApply} />
+      </Route>
+      <Route path="/vendor/dashboard">
+        <ProtectedRoute component={VendorDashboard} />
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );

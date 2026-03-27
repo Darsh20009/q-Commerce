@@ -1584,5 +1584,210 @@ export async function registerRoutes(
     res.json({ success: true, trackingNumber: "SS-" + Math.random().toString(36).substring(7).toUpperCase(), message: "Storage Station B20 stubbed" });
   });
 
+  // ─── Vendor / Multi-Seller Marketplace ───────────────────────
+
+  // Public: list active vendors
+  app.get("/api/vendors", async (_req, res) => {
+    try {
+      const all = await storage.getVendors();
+      const active = all.filter((v: any) => v.status === "active");
+      res.json(active);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Public: get single vendor store
+  app.get("/api/vendors/:id", async (req, res) => {
+    try {
+      const vendor = await storage.getVendor(req.params.id);
+      if (!vendor || (vendor as any).status !== "active") return res.status(404).json({ message: "Vendor not found" });
+      res.json(vendor);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Public: get vendor products
+  app.get("/api/vendors/:id/products", async (req, res) => {
+    try {
+      const vendor = await storage.getVendor(req.params.id);
+      if (!vendor || (vendor as any).status !== "active") return res.status(404).json({ message: "Vendor not found" });
+      const products = await storage.getVendorProducts(req.params.id);
+      res.json(products);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Authenticated: apply to become a vendor
+  app.post("/api/vendor/apply", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const user = req.user as any;
+    try {
+      const existing = await storage.getVendorByUserId(user.id);
+      if (existing) return res.status(409).json({ message: "لديك طلب بائع مسجل بالفعل" });
+      const data = { ...req.body, userId: user.id, status: "pending" };
+      const vendor = await storage.createVendor(data);
+      await storage.updateUser(user.id, { role: "vendor" });
+      res.status(201).json(vendor);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Vendor: get own profile
+  app.get("/api/vendor/me", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const user = req.user as any;
+    try {
+      const vendor = await storage.getVendorByUserId(user.id);
+      if (!vendor) return res.status(404).json({ message: "لا يوجد حساب بائع" });
+      res.json(vendor);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Vendor: update own profile
+  app.patch("/api/vendor/me", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const user = req.user as any;
+    try {
+      const vendor = await storage.getVendorByUserId(user.id);
+      if (!vendor) return res.status(404).json({ message: "لا يوجد حساب بائع" });
+      const allowed = ["storeName", "storeNameEn", "description", "logo", "coverImage", "phone", "email", "bankIBAN", "tags"];
+      const update: any = {};
+      allowed.forEach(k => { if (req.body[k] !== undefined) update[k] = req.body[k]; });
+      const updated = await storage.updateVendor((vendor as any).id, update);
+      res.json(updated);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Vendor: get own products
+  app.get("/api/vendor/products", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const user = req.user as any;
+    try {
+      const vendor = await storage.getVendorByUserId(user.id);
+      if (!vendor) return res.status(404).json({ message: "لا يوجد حساب بائع" });
+      const products = await storage.getVendorProducts((vendor as any).id);
+      res.json(products);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Vendor: add product
+  app.post("/api/vendor/products", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const user = req.user as any;
+    try {
+      const vendor = await storage.getVendorByUserId(user.id);
+      if (!vendor || (vendor as any).status !== "active") return res.status(403).json({ message: "حساب البائع غير مفعّل" });
+      const product = await storage.createProduct({ ...req.body, vendorId: (vendor as any).id });
+      res.status(201).json(product);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Vendor: update own product
+  app.patch("/api/vendor/products/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const user = req.user as any;
+    try {
+      const vendor = await storage.getVendorByUserId(user.id);
+      if (!vendor) return res.status(403).json({ message: "حساب البائع غير موجود" });
+      const product = await storage.getProduct(req.params.id);
+      if (!product || (product as any).vendorId !== (vendor as any).id) return res.status(403).json({ message: "غير مسموح" });
+      const updated = await storage.updateProduct(req.params.id, req.body);
+      res.json(updated);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Vendor: delete own product
+  app.delete("/api/vendor/products/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const user = req.user as any;
+    try {
+      const vendor = await storage.getVendorByUserId(user.id);
+      if (!vendor) return res.status(403).json({ message: "حساب البائع غير موجود" });
+      const product = await storage.getProduct(req.params.id);
+      if (!product || (product as any).vendorId !== (vendor as any).id) return res.status(403).json({ message: "غير مسموح" });
+      await storage.deleteProduct(req.params.id);
+      res.sendStatus(204);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Vendor: get own orders
+  app.get("/api/vendor/orders", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const user = req.user as any;
+    try {
+      const vendor = await storage.getVendorByUserId(user.id);
+      if (!vendor) return res.status(404).json({ message: "لا يوجد حساب بائع" });
+      const orders = await storage.getVendorOrders((vendor as any).id);
+      res.json(orders);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Admin: get all vendors
+  app.get("/api/admin/vendors", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const user = req.user as any;
+    if (user.role !== "admin") return res.sendStatus(403);
+    try {
+      const vendors = await storage.getVendors();
+      res.json(vendors);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Admin: update vendor (approve/reject/commission)
+  app.patch("/api/admin/vendors/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const user = req.user as any;
+    if (user.role !== "admin") return res.sendStatus(403);
+    try {
+      const updated = await storage.updateVendor(req.params.id, req.body);
+      // sync user role if activating/suspending
+      if (req.body.status === "active") {
+        await storage.updateUser((updated as any).userId, { role: "vendor" });
+      } else if (req.body.status === "suspended") {
+        await storage.updateUser((updated as any).userId, { role: "customer" });
+      }
+      res.json(updated);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Admin: delete vendor
+  app.delete("/api/admin/vendors/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const user = req.user as any;
+    if (user.role !== "admin") return res.sendStatus(403);
+    try {
+      const vendor = await storage.getVendor(req.params.id);
+      if (vendor) {
+        await storage.updateUser((vendor as any).userId, { role: "customer" });
+        await storage.deleteVendor(req.params.id);
+      }
+      res.sendStatus(204);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
   return httpServer;
 }

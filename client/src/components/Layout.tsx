@@ -1,7 +1,7 @@
 import logoImg from "@assets/QIROX_LOGO_1774316442270.png";
 import { ReactNode, useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { ShoppingBag, User, Menu, LogOut, Sun, Moon, Phone, Mail, Instagram, Twitter, Download, Globe, Check, Wallet, Home, Package, LayoutDashboard, ChevronRight, X, Zap, Star, HelpCircle, Shield, Settings2, Tag, Heart } from "lucide-react";
+import { ShoppingBag, User, Menu, LogOut, Sun, Moon, Phone, Mail, Instagram, Twitter, Download, Globe, Check, Wallet, Home, Package, LayoutDashboard, ChevronRight, X, Zap, Star, HelpCircle, Shield, Settings2, Tag, Heart, Store } from "lucide-react";
 import { SiTiktok, SiSnapchat, SiWhatsapp, SiX } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
@@ -309,6 +309,9 @@ export function Layout({ children }: { children: ReactNode }) {
           <div className={`hidden md:flex items-center gap-8 text-[11px] font-black uppercase ${language === 'en' ? 'tracking-widest' : ''}`}>
             <Link href="/" className={`transition-colors hover:text-primary ${location === '/' ? 'text-foreground' : 'text-muted-foreground'}`}>{t('home')}</Link>
             <Link href="/products" className={`transition-colors hover:text-primary ${location === '/products' ? 'text-foreground' : 'text-muted-foreground'}`}>{t('shop')}</Link>
+            <Link href="/stores" className={`transition-colors hover:text-primary ${location === '/stores' ? 'text-foreground' : 'text-muted-foreground'} font-bold`}>
+              {language === 'ar' ? 'المتاجر' : 'Stores'}
+            </Link>
             {deferredPrompt && (
               <Button 
                 onClick={handleInstall}
@@ -409,6 +412,15 @@ export function Layout({ children }: { children: ReactNode }) {
                       </DropdownMenuItem>
                     </Link>
                     
+                    {(user as any)?.role === 'vendor' && (
+                      <Link href="/vendor/dashboard">
+                        <DropdownMenuItem className={`cursor-pointer gap-3 p-3 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-foreground hover:text-background transition-all rounded-none ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                          <Store className="h-4 w-4 opacity-40" />
+                          {language === 'ar' ? 'لوحة البائع' : 'Vendor Dashboard'}
+                        </DropdownMenuItem>
+                      </Link>
+                    )}
+
                     {user?.role === 'admin' && (
                       <Link href="/admin">
                         <DropdownMenuItem className={`cursor-pointer gap-3 p-3 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-foreground hover:text-background transition-all rounded-none ${language === 'ar' ? 'flex-row-reverse' : ''}`}>

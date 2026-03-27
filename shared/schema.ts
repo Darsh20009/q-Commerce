@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // Enums and Types
-export const userRoles = ["admin", "employee", "customer", "support", "cashier", "accountant"] as const;
+export const userRoles = ["admin", "employee", "customer", "support", "cashier", "accountant", "vendor"] as const;
 export type UserRole = typeof userRoles[number];
 
 export const employeePermissions = [
@@ -332,6 +332,31 @@ export const insertInvoiceSchema = z.object({
 
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
 export type Invoice = InsertInvoice & { _id: string; id: string; createdAt: Date };
+
+// Vendor / Multi-Seller Schema
+export const vendorStatuses = ["pending", "active", "suspended"] as const;
+export type VendorStatus = typeof vendorStatuses[number];
+
+export const insertVendorSchema = z.object({
+  userId: z.string(),
+  storeName: z.string().min(1, "اسم المتجر مطلوب"),
+  storeNameEn: z.string().default(""),
+  description: z.string().default(""),
+  logo: z.string().default(""),
+  coverImage: z.string().default(""),
+  status: z.enum(vendorStatuses).default("pending"),
+  commissionRate: z.number().default(10),
+  phone: z.string().default(""),
+  email: z.string().default(""),
+  bankIBAN: z.string().default(""),
+  totalSales: z.number().default(0),
+  pendingPayout: z.number().default(0),
+  rating: z.number().default(0),
+  reviewCount: z.number().default(0),
+  tags: z.array(z.string()).default([]),
+});
+export type InsertVendor = z.infer<typeof insertVendorSchema>;
+export type Vendor = InsertVendor & { _id: string; id: string; createdAt: Date };
 
 // Wishlist Schema
 export const insertWishlistItemSchema = z.object({

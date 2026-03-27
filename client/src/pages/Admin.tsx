@@ -15,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { insertProductSchema, type InsertProduct, orderStatuses, employeePermissions, insertUserSchema, type InsertUser } from "@shared/schema";
 import { api } from "@shared/routes";
-import { Loader2, Plus, DollarSign, ShoppingCart, TrendingUp, BarChart3, ArrowUpRight, ArrowDownRight, Trash2, Search, Filter, ChevronDown, CheckCircle2, XCircle, Truck, PackageCheck, AlertCircle, LayoutGrid, Tag, Edit, ArrowRight, LogOut, Package, Building, User as UserIcon, History, Monitor, Clock, Settings2, Landmark, Save, CreditCard, ToggleLeft, ToggleRight, Megaphone, Send, Bike, Phone, Users, Bell, Globe, Menu, X, Star, Zap, Activity, Shield, ChevronRight, Home, RefreshCw, Eye, Wallet, MoreVertical, ImageIcon, Pencil } from "lucide-react";
+import { Loader2, Plus, DollarSign, ShoppingCart, TrendingUp, BarChart3, ArrowUpRight, ArrowDownRight, Trash2, Search, Filter, ChevronDown, CheckCircle2, XCircle, Truck, PackageCheck, AlertCircle, LayoutGrid, Tag, Edit, ArrowRight, LogOut, Package, Building, User as UserIcon, History, Monitor, Clock, Settings2, Landmark, Save, CreditCard, ToggleLeft, ToggleRight, Megaphone, Send, Bike, Phone, Users, Bell, Globe, Menu, X, Star, Zap, Activity, Shield, ChevronRight, Home, RefreshCw, Eye, Wallet, MoreVertical, ImageIcon, Pencil, Store } from "lucide-react";
 import { Link } from "wouter";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -3461,6 +3461,7 @@ const AdminSidebar = ({ activeTab, onTabChange, pendingOrders }: { activeTab: st
       label: "العملاء",
       items: [
         { id: "customers", label: "قاعدة العملاء", icon: UserIcon },
+        { id: "vendors", label: "البائعون", icon: Store },
         { id: "coupons", label: "أكواد الخصم", icon: Tag },
         { id: "broadcast", label: "إشعارات جماعية", icon: Megaphone },
       ]
@@ -3701,6 +3702,7 @@ export default function Admin() {
                 {activeTab === "shipping"  && <ShippingCompaniesPanel />}
                 {activeTab === "shifts"    && <ShiftsManagement />}
                 {activeTab === "customers" && <CustomersTable />}
+                {activeTab === "vendors"   && <VendorsPanel />}
                 {activeTab === "coupons"   && <CouponsTable />}
                 {activeTab === "marketing" && <MarketingManagement />}
                 {activeTab === "broadcast" && <BroadcastPanel />}
@@ -3716,6 +3718,205 @@ export default function Admin() {
 }
 
 // ─── Shipping Companies Panel ─────────────────────────────────────────────────
+const VendorsPanel = () => {
+  const { toast } = useToast();
+  const [filter, setFilter] = useState<"all" | "pending" | "active" | "suspended">("all");
+  const [commissionEdit, setCommissionEdit] = useState<{ id: string; rate: number } | null>(null);
+
+  const { data: vendors = [], isLoading } = useQuery<any[]>({
+    queryKey: ["/api/admin/vendors"],
+  });
+
+  const updateVendorMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
+      apiRequest("PATCH", `/api/admin/vendors/${id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/vendors"] });
+      setCommissionEdit(null);
+      toast({ title: "تم تحديث البائع" });
+    },
+    onError: (err: any) => toast({ title: "خطأ", description: err.message, variant: "destructive" }),
+  });
+
+  const deleteVendorMutation = useMutation({
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/admin/vendors/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/vendors"] });
+      toast({ title: "تم حذف البائع" });
+    },
+    onError: (err: any) => toast({ title: "خطأ", description: err.message, variant: "destructive" }),
+  });
+
+  const filtered = vendors.filter((v: any) => filter === "all" || v.status === filter);
+  const pendingCount = vendors.filter((v: any) => v.status === "pending").length;
+
+  return (
+    <div className="p-6" dir="rtl">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-xl font-black flex items-center gap-2">
+            <Store className="h-5 w-5" /> إدارة البائعين
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">{vendors.length} بائع إجمالي</p>
+        </div>
+        {pendingCount > 0 && (
+          <div className="bg-yellow-100 text-yellow-800 font-black text-sm px-4 py-2 rounded-full flex items-center gap-2">
+            <AlertCircle className="h-4 w-4" />
+            {pendingCount} طلب جديد بانتظار الموافقة
+          </div>
+        )}
+      </div>
+
+      {/* Filter buttons */}
+      <div className="flex gap-2 mb-6">
+        {[
+          { key: "all", label: "الكل" },
+          { key: "pending", label: "في الانتظار" },
+          { key: "active", label: "مفعّل" },
+          { key: "suspended", label: "موقوف" },
+        ].map((f) => (
+          <button
+            key={f.key}
+            onClick={() => setFilter(f.key as any)}
+            className={`px-4 py-1.5 text-xs font-black uppercase tracking-widest border transition-all ${
+              filter === f.key ? "bg-foreground text-background border-foreground" : "border-border hover:border-foreground"
+            }`}
+          >
+            {f.label}
+            {f.key === "pending" && pendingCount > 0 && (
+              <span className="ml-2 bg-yellow-500 text-white rounded-full w-5 h-5 inline-flex items-center justify-center text-[10px]">{pendingCount}</span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin" /></div>
+      ) : filtered.length === 0 ? (
+        <div className="text-center py-20 text-muted-foreground">
+          <Store className="h-12 w-12 mx-auto mb-3 opacity-20" />
+          <p className="font-bold">لا يوجد بائعون في هذه الفئة</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filtered.map((vendor: any) => (
+            <div key={vendor.id} className="border-2 border-border hover:border-foreground/30 transition-all p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-4 flex-1">
+                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {vendor.logo ? (
+                      <img src={vendor.logo} alt={vendor.storeName} className="w-full h-full object-cover" />
+                    ) : (
+                      <Store className="h-6 w-6 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <h3 className="font-black text-base">{vendor.storeName}</h3>
+                      {vendor.storeNameEn && <span className="text-muted-foreground text-sm">/ {vendor.storeNameEn}</span>}
+                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-none ${
+                        vendor.status === "active" ? "bg-green-100 text-green-700" :
+                        vendor.status === "pending" ? "bg-yellow-100 text-yellow-700" :
+                        "bg-red-100 text-red-700"
+                      }`}>
+                        {vendor.status === "active" ? "مفعّل" : vendor.status === "pending" ? "في الانتظار" : "موقوف"}
+                      </span>
+                    </div>
+                    {vendor.description && <p className="text-sm text-muted-foreground line-clamp-1 mb-2">{vendor.description}</p>}
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      {vendor.phone && <span>📱 {vendor.phone}</span>}
+                      {vendor.email && <span>✉️ {vendor.email}</span>}
+                      <span>📅 {new Date(vendor.createdAt).toLocaleDateString("ar-SA")}</span>
+                    </div>
+                    {/* Commission */}
+                    <div className="flex items-center gap-3 mt-3">
+                      <span className="text-xs font-bold">العمولة:</span>
+                      {commissionEdit?.id === vendor.id ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            min="0"
+                            max="50"
+                            value={commissionEdit.rate}
+                            onChange={(e) => setCommissionEdit({ id: vendor.id, rate: Number(e.target.value) })}
+                            className="w-16 h-7 text-xs border px-2 font-bold"
+                          />
+                          <span className="text-xs">%</span>
+                          <button
+                            onClick={() => updateVendorMutation.mutate({ id: vendor.id, data: { commissionRate: commissionEdit.rate } })}
+                            className="text-xs font-black bg-foreground text-background px-2 py-1"
+                          >
+                            حفظ
+                          </button>
+                          <button onClick={() => setCommissionEdit(null)} className="text-xs text-muted-foreground">إلغاء</button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setCommissionEdit({ id: vendor.id, rate: vendor.commissionRate })}
+                          className="flex items-center gap-1 text-xs font-black text-primary hover:underline"
+                        >
+                          {vendor.commissionRate}% <Edit className="h-3 w-3" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                {/* Actions */}
+                <div className="flex flex-col gap-2 flex-shrink-0">
+                  {vendor.status === "pending" && (
+                    <button
+                      onClick={() => updateVendorMutation.mutate({ id: vendor.id, data: { status: "active" } })}
+                      disabled={updateVendorMutation.isPending}
+                      className="text-xs font-black bg-green-600 text-white px-3 py-1.5 hover:bg-green-700 transition-colors flex items-center gap-1"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5" /> قبول
+                    </button>
+                  )}
+                  {vendor.status === "active" && (
+                    <button
+                      onClick={() => updateVendorMutation.mutate({ id: vendor.id, data: { status: "suspended" } })}
+                      disabled={updateVendorMutation.isPending}
+                      className="text-xs font-black bg-orange-500 text-white px-3 py-1.5 hover:bg-orange-600 transition-colors flex items-center gap-1"
+                    >
+                      <XCircle className="h-3.5 w-3.5" /> تعليق
+                    </button>
+                  )}
+                  {vendor.status === "suspended" && (
+                    <button
+                      onClick={() => updateVendorMutation.mutate({ id: vendor.id, data: { status: "active" } })}
+                      disabled={updateVendorMutation.isPending}
+                      className="text-xs font-black bg-green-600 text-white px-3 py-1.5 hover:bg-green-700 transition-colors flex items-center gap-1"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5" /> تفعيل
+                    </button>
+                  )}
+                  {vendor.status === "pending" && (
+                    <button
+                      onClick={() => updateVendorMutation.mutate({ id: vendor.id, data: { status: "suspended" } })}
+                      disabled={updateVendorMutation.isPending}
+                      className="text-xs font-black bg-red-500 text-white px-3 py-1.5 hover:bg-red-600 transition-colors flex items-center gap-1"
+                    >
+                      <XCircle className="h-3.5 w-3.5" /> رفض
+                    </button>
+                  )}
+                  <button
+                    onClick={() => { if (confirm(`حذف متجر "${vendor.storeName}"؟`)) deleteVendorMutation.mutate(vendor.id); }}
+                    disabled={deleteVendorMutation.isPending}
+                    className="text-xs font-black border border-red-300 text-red-600 px-3 py-1.5 hover:bg-red-50 transition-colors flex items-center gap-1"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> حذف
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const ShippingCompaniesPanel = () => {
   const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);

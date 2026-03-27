@@ -1,5 +1,5 @@
-import type { User, InsertUser, Product, InsertProduct, Order, InsertOrder, Category, InsertCategory, WalletTransaction, InsertWalletTransaction, OrderStatus, ActivityLog, InsertActivityLog, Coupon, InsertCoupon, Branch, InsertBranch, Banner, InsertBanner, CashShift, InsertCashShift, BranchInventory, ShippingCompany, InsertShippingCompany, AuditLog, InsertAuditLog, Role, InsertRole, StockTransfer, InsertStockTransfer, Invoice, InsertInvoice, WishlistItem, InsertWishlistItem, ProductReview, InsertProductReview } from "@shared/schema";
-import { UserModel, ProductModel, OrderModel, CategoryModel, WalletTransactionModel, ActivityLogModel, CouponModel, BranchModel, BannerModel, CashShiftModel, ShippingCompanyModel, AuditLogModel, RoleModel, StockTransferModel, InvoiceModel, StoreSettingsModel, WishlistItemModel, ProductReviewModel } from "./models";
+import type { User, InsertUser, Product, InsertProduct, Order, InsertOrder, Category, InsertCategory, WalletTransaction, InsertWalletTransaction, OrderStatus, ActivityLog, InsertActivityLog, Coupon, InsertCoupon, Branch, InsertBranch, Banner, InsertBanner, CashShift, InsertCashShift, BranchInventory, ShippingCompany, InsertShippingCompany, AuditLog, InsertAuditLog, Role, InsertRole, StockTransfer, InsertStockTransfer, Invoice, InsertInvoice, WishlistItem, InsertWishlistItem, ProductReview, InsertProductReview, Vendor, InsertVendor } from "@shared/schema";
+import { UserModel, ProductModel, OrderModel, CategoryModel, WalletTransactionModel, ActivityLogModel, CouponModel, BranchModel, BannerModel, CashShiftModel, ShippingCompanyModel, AuditLogModel, RoleModel, StockTransferModel, InvoiceModel, StoreSettingsModel, WishlistItemModel, ProductReviewModel, VendorModel } from "./models";
 
 export interface IStorage {
   // Users
@@ -118,6 +118,16 @@ export interface IStorage {
 
   // Low Stock
   getLowStockProducts(threshold?: number): Promise<Product[]>;
+
+  // Vendors
+  getVendors(): Promise<Vendor[]>;
+  getVendor(id: string): Promise<Vendor | undefined>;
+  getVendorByUserId(userId: string): Promise<Vendor | undefined>;
+  createVendor(data: InsertVendor): Promise<Vendor>;
+  updateVendor(id: string, update: Partial<InsertVendor>): Promise<Vendor>;
+  deleteVendor(id: string): Promise<void>;
+  getVendorProducts(vendorId: string): Promise<Product[]>;
+  getVendorOrders(vendorId: string): Promise<Order[]>;
 }
 
 export class MongoDBStorage implements IStorage {
@@ -705,6 +715,53 @@ export class MongoDBStorage implements IStorage {
         return total <= threshold;
       })
       .map(p => ({ ...p, id: (p as any)._id.toString() } as any));
+  }
+
+  // Vendors
+  async getVendors(): Promise<Vendor[]> {
+    const vendors = await VendorModel.find().sort({ createdAt: -1 }).lean();
+    return vendors.map(v => ({ ...v, id: (v as any)._id.toString() } as any));
+  }
+
+  async getVendor(id: string): Promise<Vendor | undefined> {
+    try {
+      const v = await VendorModel.findById(id).lean();
+      return v ? { ...v, id: (v as any)._id.toString() } as any : undefined;
+    } catch { return undefined; }
+  }
+
+  async getVendorByUserId(userId: string): Promise<Vendor | undefined> {
+    const v = await VendorModel.findOne({ userId }).lean();
+    return v ? { ...v, id: (v as any)._id.toString() } as any : undefined;
+  }
+
+  async createVendor(data: InsertVendor): Promise<Vendor> {
+    const v = await VendorModel.create(data);
+    return { ...v.toObject(), id: (v as any)._id.toString() } as any;
+  }
+
+  async updateVendor(id: string, update: Partial<InsertVendor>): Promise<Vendor> {
+    const v = await VendorModel.findByIdAndUpdate(id, { $set: update }, { new: true }).lean();
+    if (!v) throw new Error("Vendor not found");
+    return { ...v, id: (v as any)._id.toString() } as any;
+  }
+
+  async deleteVendor(id: string): Promise<void> {
+    await VendorModel.findByIdAndDelete(id);
+  }
+
+  async getVendorProducts(vendorId: string): Promise<Product[]> {
+    const products = await ProductModel.find({ vendorId }).lean();
+    return products.map(p => ({ ...p, id: (p as any)._id.toString() } as any));
+  }
+
+  async getVendorOrders(vendorId: string): Promise<Order[]> {
+    const products = await ProductModel.find({ vendorId }, { _id: 1 }).lean();
+    const productIds = products.map(p => (p as any)._id.toString());
+    const orders = await OrderModel.find({
+      "items.productId": { $in: productIds }
+    }).sort({ createdAt: -1 }).lean();
+    return orders.map(o => ({ ...o, id: (o as any)._id.toString() } as any));
   }
 }
 
