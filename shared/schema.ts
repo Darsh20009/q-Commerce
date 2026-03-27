@@ -147,7 +147,7 @@ export const insertProductSchema = z.object({
 });
 
 export type InsertProduct = z.infer<typeof insertProductSchema>;
-export type Product = InsertProduct & { _id: string; id: string; createdAt: Date };
+export type Product = InsertProduct & { _id: string; id: string; createdAt: Date; vendorId?: string | null; updatedAt?: Date };
 
 // Category Schema
 export const insertCategorySchema = z.object({
@@ -234,6 +234,8 @@ export const insertWalletTransactionSchema = z.object({
   amount: z.number(),
   type: z.enum(["deposit", "withdrawal", "payment", "refund"]),
   description: z.string(),
+  reference: z.string().optional(),
+  status: z.string().optional(),
   createdAt: z.date().optional(),
 });
 
@@ -328,6 +330,9 @@ export const insertInvoiceSchema = z.object({
   total: z.number(),
   notes: z.string().optional(),
   qrCode: z.string().optional(), // ZATCA requirement placeholder
+  customerId: z.string().optional(),
+  discount: z.number().optional(),
+  tax: z.number().optional(),
 });
 
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;

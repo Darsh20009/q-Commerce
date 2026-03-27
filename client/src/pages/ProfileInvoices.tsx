@@ -48,7 +48,7 @@ function printInvoice(invoice: Invoice, language: string) {
       <div class="inv-num">${invoice.invoiceNumber}</div>
       <div class="inv-date">${isAr ? "تاريخ الإصدار:" : "Issue Date:"} ${format(new Date(invoice.issueDate), "yyyy-MM-dd")}</div>
       ${invoice.dueDate ? `<div class="inv-date">${isAr ? "تاريخ الاستحقاق:" : "Due Date:"} ${format(new Date(invoice.dueDate), "yyyy-MM-dd")}</div>` : ""}
-      <div style="margin-top:6px"><span class="status-badge">${invoice.status === "paid" ? (isAr ? "مدفوعة" : "PAID") : invoice.status === "pending" ? (isAr ? "معلقة" : "PENDING") : invoice.status}</span></div>
+      <div style="margin-top:6px"><span class="status-badge">${(invoice as any).status === "paid" ? (isAr ? "مدفوعة" : "PAID") : ["pending","draft","issued"].includes((invoice as any).status) ? (isAr ? "معلقة" : "PENDING") : (invoice as any).status}</span></div>
     </div>
   </div>
 
@@ -150,11 +150,11 @@ export default function ProfileInvoices() {
                   <p className="text-xs text-slate-400 mt-1">{format(new Date(viewing.issueDate), "yyyy-MM-dd")}</p>
                   <span className={`inline-block mt-2 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded-none ${
                     viewing.status === "paid" ? "bg-emerald-100 text-emerald-700" :
-                    viewing.status === "pending" ? "bg-amber-100 text-amber-700" :
+                    (["pending","draft","issued"] as string[]).includes(viewing.status) ? "bg-amber-100 text-amber-700" :
                     "bg-slate-100 text-slate-600"
                   }`}>
                     {viewing.status === "paid" ? (isAr ? "مدفوعة" : "PAID") :
-                     viewing.status === "pending" ? (isAr ? "معلقة" : "PENDING") : viewing.status}
+                     (["pending","draft","issued"] as string[]).includes(viewing.status) ? (isAr ? "معلقة" : "PENDING") : viewing.status}
                   </span>
                 </div>
               </div>
@@ -247,11 +247,11 @@ export default function ProfileInvoices() {
                 </span>
                 <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-none ${
                   invoice.status === "paid" ? "bg-emerald-100 text-emerald-700" :
-                  invoice.status === "pending" ? "bg-amber-100 text-amber-700" :
+                  (["pending","draft","issued"] as string[]).includes(invoice.status) ? "bg-amber-100 text-amber-700" :
                   "bg-slate-100 text-slate-500"
                 }`}>
                   {invoice.status === "paid" ? (isAr ? "مدفوعة" : "Paid") :
-                   invoice.status === "pending" ? (isAr ? "معلقة" : "Pending") : invoice.status}
+                   (["pending","draft","issued"] as string[]).includes(invoice.status) ? (isAr ? "معلقة" : "Pending") : invoice.status}
                 </span>
                 <div className="flex gap-1">
                   <button

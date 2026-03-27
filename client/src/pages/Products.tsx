@@ -98,7 +98,7 @@ export default function Products() {
         if (v.size) sizes.add(v.size);
       });
     });
-    return { allColors: [...colors], allSizes: [...sizes] };
+    return { allColors: Array.from(colors), allSizes: Array.from(sizes) };
   }, [products]);
 
   // ── URL sync ──────────────────────────────────────────────────────────────

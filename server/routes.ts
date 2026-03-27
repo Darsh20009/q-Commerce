@@ -1824,7 +1824,7 @@ export async function registerRoutes(
             await storage.createWalletTransaction({
               userId: returnReq.userId,
               amount: refundAmount,
-              type: "credit",
+              type: "deposit",
               description: `استرداد طلب #${returnReq.orderId?.slice(-6)}`,
               reference: returnReq.orderId,
               status: "completed",

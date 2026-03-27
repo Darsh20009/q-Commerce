@@ -1262,7 +1262,7 @@ const CategoriesTable = memo(() => {
       const r = await fetch("/api/upload", { method: "POST", body: fd, credentials: "include" });
       if (!r.ok) throw new Error("Upload failed");
       const data = await r.json();
-      setNewCat(prev => ({ ...prev, image: data.url }));
+      setNewCat((prev: any) => ({ ...prev, image: data.url }));
     } catch {
       toast({ title: "فشل رفع الصورة", variant: "destructive" });
     } finally {
@@ -4270,13 +4270,13 @@ const VendorsPanel = () => {
                             type="number"
                             min="0"
                             max="50"
-                            value={commissionEdit.rate}
+                            value={commissionEdit!.rate}
                             onChange={(e) => setCommissionEdit({ id: vendor.id, rate: Number(e.target.value) })}
                             className="w-16 h-7 text-xs border px-2 font-bold"
                           />
                           <span className="text-xs">%</span>
                           <button
-                            onClick={() => updateVendorMutation.mutate({ id: vendor.id, data: { commissionRate: commissionEdit.rate } })}
+                            onClick={() => updateVendorMutation.mutate({ id: vendor.id, data: { commissionRate: commissionEdit!.rate } })}
                             className="text-xs font-black bg-foreground text-background px-2 py-1"
                           >
                             حفظ

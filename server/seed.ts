@@ -92,6 +92,7 @@ export async function seed() {
       ],
       isFeatured: true,
       printBarcode: true,
+      categoryIds: [],
       variants: [
         { color: "Burgundy", size: "S", sku: "BURG-S", stock: 10, cost: 150 },
         { color: "Burgundy", size: "M", sku: "BURG-M", stock: 15, cost: 150 },
@@ -110,6 +111,7 @@ export async function seed() {
       ],
       isFeatured: true,
       printBarcode: true,
+      categoryIds: [],
       variants: [
         { color: "Teal", size: "S", sku: "TEAL-S", stock: 8, cost: 200 },
         { color: "Teal", size: "M", sku: "TEAL-M", stock: 12, cost: 200 },
@@ -127,6 +129,7 @@ export async function seed() {
       ],
       isFeatured: true,
       printBarcode: true,
+      categoryIds: [],
       variants: [
         { color: "Grey", size: "XS", sku: "GREY-XS", stock: 6, cost: 120 },
         { color: "Grey", size: "S", sku: "GREY-S", stock: 10, cost: 120 },
@@ -146,6 +149,7 @@ export async function seed() {
       ],
       isFeatured: true,
       printBarcode: true,
+      categoryIds: [],
       variants: [
         { color: "Blue", size: "S", sku: "BLUE-S", stock: 11, cost: 140 },
         { color: "Blue", size: "M", sku: "BLUE-M", stock: 16, cost: 140 },
