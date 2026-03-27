@@ -1,10 +1,8 @@
-# Gen M&Z - Fashion E-commerce Platform
+# Qirox Studio - E-commerce & POS Platform
 
 ## Overview
 
-Gen M&Z is a full-featured bilingual (Arabic/English) fashion e-commerce platform targeting Saudi Arabia's Gen M and Gen Z consumers. The platform features a minimalist, luxury aesthetic inspired by Zara and Everlane, with complete storefront functionality, shopping cart, user authentication, and an admin dashboard for managing products, orders, and customers.
-
-The application follows a monorepo structure with a React frontend (Vite), Express backend, and PostgreSQL database using Drizzle ORM. It supports RTL layout for Arabic, dark/light themes, and is designed mobile-first with responsive breakpoints.
+Qirox Studio is a comprehensive bilingual (Arabic/English) e-commerce and Point of Sale (POS) platform for the Saudi Arabian fashion market. It includes a customer storefront, admin dashboard, and POS system for physical branch management. The platform is fully localized with RTL support, ZATCA-compliant invoice placeholders, and Saudi-specific payment methods.
 
 ## User Preferences
 
@@ -14,83 +12,93 @@ Preferred communication style: Simple, everyday language.
 
 ### Frontend Architecture
 - **Framework**: React 18 with TypeScript
-- **Build Tool**: Vite with custom plugins for Replit integration
+- **Build Tool**: Vite 7 with Replit plugins (cartographer, dev-banner, runtime-error-modal)
 - **Routing**: Wouter (lightweight React router)
 - **State Management**: 
   - TanStack Query for server state (products, orders, auth)
-  - Zustand for client state (shopping cart with persistence)
-- **Styling**: Tailwind CSS with shadcn/ui component library (New York style)
-- **Animations**: Framer Motion for page transitions and micro-interactions
-- **Icons**: Lucide React + react-icons for social media icons
+  - Zustand for client state (cart, language preference)
+- **Styling**: Tailwind CSS with shadcn/ui component library
+- **Animations**: Framer Motion
+- **Icons**: Lucide React + react-icons
+- **Charts**: Recharts for admin analytics
+- **Maps**: Leaflet / react-leaflet for branch locations
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express
-- **Language**: TypeScript with ESM modules
-- **Authentication**: Passport.js with local strategy, express-session with memory store
-- **Password Hashing**: Node crypto scrypt with salt
-- **API Design**: RESTful endpoints defined in shared/routes.ts with Zod validation
-- **Security**: Helmet security headers, express-rate-limit (20 req/15min on auth, 500/15min global), no hardcoded secrets, SESSION_SECRET from env
+- **Language**: TypeScript with ESM modules (tsx for dev)
+- **Authentication**: Passport.js with local strategy, express-session with memorystore
+- **API Design**: RESTful endpoints in server/routes.ts with Zod validation (shared/routes.ts)
+- **Security**: Helmet headers, express-rate-limit (20/15min auth, 500/15min global)
+- **Real-time**: WebSocket server (ws) on /ws path for notifications
+- **File Uploads**: Multer for product images stored in /uploads/
+- **Email**: SMTP2Go service (configured via SMTP2GO_API_KEY env var)
+- **AI Features**: OpenAI integration for product descriptions (OPENAI_API_KEY)
 
 ### Database Layer
-- **ORM**: Drizzle ORM with PostgreSQL dialect
-- **Schema Location**: shared/schema.ts (shared between frontend and backend)
-- **Migrations**: drizzle-kit for schema management
-- **Key Tables**: users, products, orders, categories
-- **Product Variants**: Stored as JSONB for flexibility (color, size, sku, stock)
+- **Database**: MongoDB via Mongoose
+- **Connection**: MONGODB_URI environment variable (MongoDB Atlas)
+- **Models**: server/models.ts — users, products, orders, categories, branches, etc.
+- **Seeding**: server/seed.ts — auto-seeds admin user on startup
 
 ### Project Structure
 ```
 ├── client/src/           # React frontend
-│   ├── components/       # Reusable UI components
-│   ├── pages/           # Route pages (Home, Products, Cart, Admin, etc.)
-│   ├── hooks/           # Custom hooks (auth, cart, products)
+│   ├── components/       # Reusable UI components (shadcn/ui, layout, etc.)
+│   ├── pages/           # Route pages (Home, Products, Cart, Admin, POS, etc.)
+│   ├── hooks/           # Custom hooks (auth, cart, language, notifications)
 │   └── lib/             # Utilities and query client
 ├── server/              # Express backend
+│   ├── index.ts         # Server entry point, WebSocket setup
 │   ├── routes.ts        # API endpoint definitions
+│   ├── models.ts        # Mongoose schemas
 │   ├── storage.ts       # Database access layer
-│   ├── auth.ts          # Authentication setup
-│   └── seed.ts          # Initial data seeding
-├── shared/              # Shared code
-│   ├── schema.ts        # Drizzle database schemas
+│   ├── auth.ts          # Passport authentication setup
+│   ├── seed.ts          # Database seeding
+│   ├── ai.ts            # OpenAI integration
+│   ├── email.ts         # Email service
+│   ├── notifications.ts # WebSocket notifications
+│   └── payment-simulator.ts  # Tamara/Tabby/STC Pay/Apple Pay simulation
+├── shared/              # Shared code (frontend + backend)
+│   ├── schema.ts        # Zod schemas and TypeScript types
 │   └── routes.ts        # API route definitions with Zod schemas
-└── attached_assets/     # Static assets and reference materials
+├── uploads/             # Uploaded product images
+└── attached_assets/     # Static reference assets
 ```
 
-### Design System
-- **Typography**: Cairo font for Arabic/body text, with display and body font variables
-- **Color Scheme**: Black/white minimalist luxury theme with CSS custom properties
-- **RTL Support**: Full right-to-left layout with dir="rtl" attribute
-- **Theme Toggle**: Dark/light mode with localStorage persistence
+### Key Features
+- **Storefront**: Product catalog, cart, checkout with multiple Saudi payment methods
+- **Admin Dashboard**: Analytics, product management, order management, staff roles (RBAC)
+- **POS System**: Cashier interface, cash drawer management, branch inventory
+- **Multi-branch**: Branch-specific inventory tracking with map view
+- **PWA**: Service worker, web app manifest, installable
 
-### User Roles
-The system supports four roles: admin, employee, customer, and support. Admins have full access to the dashboard for managing products, orders, and customers.
+### User Roles & Permissions
+- **admin**: Full access to all features
+- **employee**: Configurable permissions (pos.access, staff.manage, settings.manage, reports.view, etc.)
+- **customer**: Storefront, cart, orders, profile
 
-## External Dependencies
+## Environment Variables
 
-### Database
-- **PostgreSQL**: Primary database, connection via DATABASE_URL environment variable
-- **Drizzle ORM**: Type-safe database queries and migrations
+| Variable | Purpose |
+|----------|---------|
+| MONGODB_URI | MongoDB Atlas connection string |
+| PORT | Server port (default: 5000) |
+| SESSION_SECRET | Express session secret |
+| SMTP2GO_API_KEY | Email service API key |
+| SMTP2GO_SENDER | Sender email address |
+| SMTP2GO_SENDER_NAME | Sender display name |
+| OPENAI_API_KEY | OpenAI API key for AI features |
+| VAPID_PUBLIC_KEY | Web push notifications public key |
+| VAPID_PRIVATE_KEY | Web push notifications private key |
 
-### Authentication
-- **Passport.js**: Authentication middleware with local username/password strategy
-- **express-session**: Session management with configurable memory store
-- **SESSION_SECRET**: Environment variable for session encryption
+## Development
 
-### Frontend Libraries
-- **@tanstack/react-query**: Server state management and caching
-- **zustand**: Client-side state with localStorage persistence for cart
-- **shadcn/ui**: Pre-built accessible UI components (Radix primitives)
-- **framer-motion**: Animation library for transitions
-- **react-hook-form + zod**: Form handling with validation
+- **Start**: `npm run dev` — runs tsx server/index.ts + Vite in middleware mode on port 5000
+- **Build**: `npm run build` — runs script/build.ts (esbuild + Vite)
+- **Production**: `npm start` — runs dist/index.js
 
-### Build and Development
-- **Vite**: Frontend build tool with HMR
-- **esbuild**: Server bundling for production
-- **tsx**: TypeScript execution for development
+## Deployment
 
-### Fonts
-- **Google Fonts**: Cairo (Arabic support), Manrope, Cormorant Garamond (per design guidelines)
-
-### Image Storage
-- Design specifies Cloudinary/S3 integration for product images (not yet implemented)
-- Currently using static assets and external URLs
+- Build command: `npm run build`
+- Run command: `node ./dist/index.cjs`
+- Target: Autoscale
