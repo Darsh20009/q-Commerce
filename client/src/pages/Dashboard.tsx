@@ -83,6 +83,12 @@ export default function Dashboard() {
     },
   });
 
+  useEffect(() => {
+    if (!authLoading && !user) {
+      setLocation("/login");
+    }
+  }, [authLoading, user, setLocation]);
+
   if (authLoading) return (
     <div className="flex h-screen items-center justify-center bg-[#080c14]">
       <div className="flex flex-col items-center gap-4">
@@ -92,7 +98,11 @@ export default function Dashboard() {
     </div>
   );
 
-  if (!user) { setLocation("/login"); return null; }
+  if (!user) return (
+    <div className="flex h-screen items-center justify-center bg-[#080c14]">
+      <div className="w-16 h-16 border-2 border-white/10 border-t-white/60 rounded-full animate-spin" />
+    </div>
+  );
 
   const isAdmin = user.role === "admin";
   const sparkData = [30, 45, 28, 60, 40, 70, 55, 80, 65, 90];

@@ -4059,6 +4059,12 @@ export default function Admin() {
     return () => clearInterval(iv);
   }, []);
 
+  useEffect(() => {
+    if (!authLoading && (!user || user.role !== 'admin')) {
+      setLocation("/");
+    }
+  }, [authLoading, user, setLocation]);
+
   if (authLoading) return (
     <div className="flex h-screen items-center justify-center bg-slate-50">
       <div className="flex flex-col items-center gap-4">
@@ -4067,7 +4073,11 @@ export default function Admin() {
       </div>
     </div>
   );
-  if (!user || user.role !== 'admin') { setLocation("/"); return null; }
+  if (!user || user.role !== 'admin') return (
+    <div className="flex h-screen items-center justify-center bg-slate-50">
+      <div className="w-12 h-12 border-2 border-slate-200 border-t-primary rounded-full animate-spin" />
+    </div>
+  );
 
   return (
     <div className="flex h-screen w-full bg-slate-50 text-slate-900 overflow-hidden" dir="rtl">

@@ -7,7 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { useLanguage } from "@/hooks/use-language";
 import { AuthProvider } from "@/components/auth-provider";
 import { SplashScreen } from "@/components/SplashScreen";
-import { useState } from "react";
+import { useState, Component, ReactNode } from "react";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import Products from "@/pages/Products";
@@ -28,14 +28,11 @@ import PaymentGateway from "@/pages/PaymentGateway";
 import TamaraCheckout from "@/pages/TamaraCheckout";
 import TabbyCheckout from "@/pages/TabbyCheckout";
 import STCCheckout from "@/pages/STCCheckout";
-
 import Profile from "@/pages/Profile";
-
 import AdminBranches from "@/pages/AdminBranches";
 import AdminBranchInventory from "@/pages/AdminBranchInventory";
 import AdminStaff from "@/pages/AdminStaff";
 import AdminBanners from "@/pages/AdminBanners";
-
 import AdminAuditLogs from "@/pages/AdminAuditLogs";
 import AdminRoles from "@/pages/AdminRoles";
 import AdminShippingCompanies from "@/pages/AdminShippingCompanies";
@@ -47,11 +44,39 @@ import VendorStore from "@/pages/VendorStore";
 import VendorsList from "@/pages/VendorsList";
 import CashDrawer from "@/pages/CashDrawer";
 import CashDrawerReport from "@/pages/CashDrawerReport";
-
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 
-// Protected Route Component
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error?: Error }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error: Error, info: any) {
+    console.error("[ErrorBoundary]", error, info);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 p-8 text-center" dir="rtl">
+          <h2 className="text-xl font-bold mb-3 text-slate-800">حدث خطأ غير متوقع</h2>
+          <p className="text-slate-500 text-sm mb-6">يرجى إعادة تحميل الصفحة</p>
+          <button
+            onClick={() => { this.setState({ hasError: false }); window.location.reload(); }}
+            className="px-6 py-2 bg-black text-white text-sm font-bold rounded-none hover:bg-slate-800 transition-colors"
+          >
+            إعادة التحميل
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function ProtectedRoute({ component: Component, permission }: { component: React.ComponentType, permission?: string }) {
   const { user, isLoading } = useAuth();
   const [location] = useLocation();
@@ -106,7 +131,7 @@ function Router() {
       <Route path="/dashboard">
         <ProtectedRoute component={Dashboard} />
       </Route>
-      
+
       {/* Admin Section */}
       <Route path="/admin">
         <ProtectedRoute component={Admin} />
@@ -162,10 +187,12 @@ function Router() {
 
 function AppContent() {
   const { language } = useLanguage();
-  
+
   return (
     <div dir={language === 'ar' ? 'rtl' : 'ltr'} lang={language}>
-      <Router />
+      <ErrorBoundary>
+        <Router />
+      </ErrorBoundary>
     </div>
   );
 }

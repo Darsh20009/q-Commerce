@@ -1,25 +1,39 @@
-const CACHE_NAME = 'qirox-studio-v4';
-const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-];
+const CACHE_NAME = 'qirox-studio-v5';
+const STATIC_ASSETS_CACHE = 'qirox-static-v5';
+
+// Only cache static assets with hashed filenames
+const STATIC_EXTENSIONS = ['.js', '.css', '.woff2', '.woff', '.ttf', '.png', '.jpg', '.jpeg', '.svg', '.ico', '.webp'];
+
+function isStaticAsset(url) {
+  const urlObj = new URL(url);
+  return STATIC_EXTENSIONS.some(ext => urlObj.pathname.endsWith(ext)) && 
+         (urlObj.pathname.includes('/assets/') || urlObj.pathname.includes('/icons/') || urlObj.pathname.includes('/uploads/'));
+}
+
+function isApiRequest(url) {
+  return new URL(url).pathname.startsWith('/api/');
+}
+
+function isNavigationRequest(request) {
+  return request.mode === 'navigate' || 
+         (request.method === 'GET' && request.headers.get('accept')?.includes('text/html'));
+}
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE).catch(() => {}))
-  );
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     Promise.all([
       self.clients.claim(),
+      // Clear ALL old caches on activation
       caches.keys().then((cacheNames) =>
         Promise.all(
           cacheNames.map((name) => {
-            if (name !== CACHE_NAME) return caches.delete(name);
+            if (name !== CACHE_NAME && name !== STATIC_ASSETS_CACHE) {
+              return caches.delete(name);
+            }
           })
         )
       ),
@@ -28,9 +42,50 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET' || event.request.url.includes('/api/')) return;
+  const { request } = event;
+  
+  // Ignore non-GET requests
+  if (request.method !== 'GET') return;
+  
+  // Ignore API requests - always go to network
+  if (isApiRequest(request.url)) return;
+  
+  // For navigation (HTML page) requests: Network-first strategy
+  // This ensures fresh HTML is always loaded, preventing stale chunk reference issues
+  if (isNavigationRequest(request)) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          // Don't cache HTML responses - always fetch fresh
+          return response;
+        })
+        .catch(() => {
+          // Only fall back to cache if offline
+          return caches.match('/') || caches.match('/index.html');
+        })
+    );
+    return;
+  }
+  
+  // For static assets with hashed filenames: Cache-first strategy
+  if (isStaticAsset(request.url)) {
+    event.respondWith(
+      caches.open(STATIC_ASSETS_CACHE).then((cache) =>
+        cache.match(request).then((cached) => {
+          if (cached) return cached;
+          return fetch(request).then((response) => {
+            if (response.ok) cache.put(request, response.clone());
+            return response;
+          });
+        })
+      )
+    );
+    return;
+  }
+  
+  // For everything else: Network-first
   event.respondWith(
-    caches.match(event.request).then((response) => response || fetch(event.request))
+    fetch(request).catch(() => caches.match(request))
   );
 });
 
