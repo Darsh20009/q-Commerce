@@ -333,6 +333,46 @@ export const insertInvoiceSchema = z.object({
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
 export type Invoice = InsertInvoice & { _id: string; id: string; createdAt: Date };
 
+// Flash Deals Schema
+export const insertFlashDealSchema = z.object({
+  productId: z.string(),
+  title: z.string().default(""),
+  titleEn: z.string().default(""),
+  discountPercent: z.number().min(1).max(99).default(20),
+  discountAmount: z.number().default(0),
+  startTime: z.string(),
+  endTime: z.string(),
+  maxQuantity: z.number().default(0),
+  soldCount: z.number().default(0),
+  isActive: z.boolean().default(true),
+  badgeColor: z.string().default("#ef4444"),
+});
+export type InsertFlashDeal = z.infer<typeof insertFlashDealSchema>;
+export type FlashDeal = InsertFlashDeal & { _id: string; id: string; createdAt: Date };
+
+// Return Request Schema
+export const returnStatuses = ["pending", "approved", "rejected", "completed"] as const;
+export type ReturnStatus = typeof returnStatuses[number];
+export const insertReturnRequestSchema = z.object({
+  orderId: z.string(),
+  userId: z.string(),
+  items: z.array(z.object({
+    productId: z.string(),
+    title: z.string(),
+    quantity: z.number(),
+    price: z.number(),
+  })),
+  reason: z.string().min(1),
+  reasonDetail: z.string().default(""),
+  status: z.enum(returnStatuses).default("pending"),
+  refundAmount: z.number().default(0),
+  refundMethod: z.enum(["wallet", "original"]).default("wallet"),
+  adminNote: z.string().default(""),
+  images: z.array(z.string()).default([]),
+});
+export type InsertReturnRequest = z.infer<typeof insertReturnRequestSchema>;
+export type ReturnRequest = InsertReturnRequest & { _id: string; id: string; createdAt: Date };
+
 // Vendor / Multi-Seller Schema
 export const vendorStatuses = ["pending", "active", "suspended"] as const;
 export type VendorStatus = typeof vendorStatuses[number];

@@ -68,21 +68,22 @@ const trustBadges = [
   { icon: Headphones, label_ar: "دعم ٢٤/٧", sub_ar: "فريق متخصص لمساعدتك", label_en: "24/7 Support", sub_en: "Dedicated support team" },
 ];
 
-function FlashCountdown() {
-  const [time, setTime] = useState({ h: 5, m: 59, s: 59 });
+function FlashCountdown({ endTime }: { endTime?: string }) {
+  const getRemaining = () => {
+    if (!endTime) return { h: 5, m: 59, s: 59 };
+    const diff = Math.max(0, new Date(endTime).getTime() - Date.now());
+    const totalSecs = Math.floor(diff / 1000);
+    return {
+      h: Math.floor(totalSecs / 3600),
+      m: Math.floor((totalSecs % 3600) / 60),
+      s: totalSecs % 60,
+    };
+  };
+  const [time, setTime] = useState(getRemaining);
   useEffect(() => {
-    const iv = setInterval(() => {
-      setTime(prev => {
-        let { h, m, s } = prev;
-        s--;
-        if (s < 0) { s = 59; m--; }
-        if (m < 0) { m = 59; h--; }
-        if (h < 0) { h = 23; }
-        return { h, m, s };
-      });
-    }, 1000);
+    const iv = setInterval(() => setTime(getRemaining()), 1000);
     return () => clearInterval(iv);
-  }, []);
+  }, [endTime]);
   const pad = (n: number) => String(n).padStart(2, "0");
   return (
     <div className="flex items-center gap-1 text-white" dir="ltr">
@@ -112,6 +113,26 @@ export default function Home() {
   const featuredProducts = products?.slice(0, 8) || [];
   const newArrivals = products?.slice(0, 4) || [];
   const bestSellers = products?.slice(4, 8) || [];
+
+  // Flash Deals from API
+  const { data: flashDealsData = [] } = useQuery<any[]>({ queryKey: ["/api/flash-deals"] });
+  const hasFlashDeals = flashDealsData.length > 0;
+  // Use nearest ending flash deal's endTime for countdown
+  const flashEndTime = hasFlashDeals
+    ? flashDealsData.sort((a, b) => new Date(a.endTime).getTime() - new Date(b.endTime).getTime())[0]?.endTime
+    : undefined;
+  // Flash deal products enriched with discount info
+  const flashDealProducts = hasFlashDeals
+    ? flashDealsData.map((deal: any) => ({
+        ...deal.product,
+        _flashDeal: deal,
+        price: deal.product?.price
+          ? (deal.product.price * (1 - deal.discountPercent / 100)).toFixed(2)
+          : deal.product?.price,
+        originalPrice: deal.product?.price,
+        discountBadge: `${deal.discountPercent}%`,
+      }))
+    : newArrivals;
 
   useEffect(() => {
     if (user && ["admin", "employee", "support"].includes(user.role)) {
@@ -400,7 +421,7 @@ export default function Home() {
               <span className="text-white/40 text-xs font-bold uppercase tracking-widest">
                 {isRtl ? "تنتهي خلال" : "Ends in"}
               </span>
-              <FlashCountdown />
+              <FlashCountdown endTime={flashEndTime} />
             </div>
           </div>
 
@@ -410,16 +431,22 @@ export default function Home() {
                 <div key={i} className="aspect-[3/4] bg-white/5 animate-pulse rounded-lg" />
               ))}
             </div>
-          ) : featuredProducts.length > 0 ? (
+          ) : flashDealProducts.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {newArrivals.map((product, i) => (
+              {flashDealProducts.slice(0, 4).map((product: any, i: number) => (
                 <motion.div
-                  key={product.id}
+                  key={product.id || product._id || i}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.08 }}
+                  className="relative"
                 >
+                  {product.discountBadge && (
+                    <div className="absolute top-2 right-2 z-10 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">
+                      -{product.discountBadge}
+                    </div>
+                  )}
                   <ProductCard product={product} />
                 </motion.div>
               ))}

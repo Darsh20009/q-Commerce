@@ -1,5 +1,5 @@
-import type { User, InsertUser, Product, InsertProduct, Order, InsertOrder, Category, InsertCategory, WalletTransaction, InsertWalletTransaction, OrderStatus, ActivityLog, InsertActivityLog, Coupon, InsertCoupon, Branch, InsertBranch, Banner, InsertBanner, CashShift, InsertCashShift, BranchInventory, ShippingCompany, InsertShippingCompany, AuditLog, InsertAuditLog, Role, InsertRole, StockTransfer, InsertStockTransfer, Invoice, InsertInvoice, WishlistItem, InsertWishlistItem, ProductReview, InsertProductReview, Vendor, InsertVendor } from "@shared/schema";
-import { UserModel, ProductModel, OrderModel, CategoryModel, WalletTransactionModel, ActivityLogModel, CouponModel, BranchModel, BannerModel, CashShiftModel, ShippingCompanyModel, AuditLogModel, RoleModel, StockTransferModel, InvoiceModel, StoreSettingsModel, WishlistItemModel, ProductReviewModel, VendorModel } from "./models";
+import type { User, InsertUser, Product, InsertProduct, Order, InsertOrder, Category, InsertCategory, WalletTransaction, InsertWalletTransaction, OrderStatus, ActivityLog, InsertActivityLog, Coupon, InsertCoupon, Branch, InsertBranch, Banner, InsertBanner, CashShift, InsertCashShift, BranchInventory, ShippingCompany, InsertShippingCompany, AuditLog, InsertAuditLog, Role, InsertRole, StockTransfer, InsertStockTransfer, Invoice, InsertInvoice, WishlistItem, InsertWishlistItem, ProductReview, InsertProductReview, Vendor, InsertVendor, FlashDeal, InsertFlashDeal, ReturnRequest, InsertReturnRequest } from "@shared/schema";
+import { UserModel, ProductModel, OrderModel, CategoryModel, WalletTransactionModel, ActivityLogModel, CouponModel, BranchModel, BannerModel, CashShiftModel, ShippingCompanyModel, AuditLogModel, RoleModel, StockTransferModel, InvoiceModel, StoreSettingsModel, WishlistItemModel, ProductReviewModel, VendorModel, FlashDealModel, ReturnRequestModel } from "./models";
 
 export interface IStorage {
   // Users
@@ -128,6 +128,20 @@ export interface IStorage {
   deleteVendor(id: string): Promise<void>;
   getVendorProducts(vendorId: string): Promise<Product[]>;
   getVendorOrders(vendorId: string): Promise<Order[]>;
+
+  // Flash Deals
+  getFlashDeals(activeOnly?: boolean): Promise<FlashDeal[]>;
+  getFlashDeal(id: string): Promise<FlashDeal | undefined>;
+  createFlashDeal(data: InsertFlashDeal): Promise<FlashDeal>;
+  updateFlashDeal(id: string, update: Partial<InsertFlashDeal>): Promise<FlashDeal>;
+  deleteFlashDeal(id: string): Promise<void>;
+  getActiveFlashDeals(): Promise<FlashDeal[]>;
+
+  // Return Requests
+  getReturnRequests(filter?: { userId?: string; status?: string }): Promise<ReturnRequest[]>;
+  getReturnRequest(id: string): Promise<ReturnRequest | undefined>;
+  createReturnRequest(data: InsertReturnRequest): Promise<ReturnRequest>;
+  updateReturnRequest(id: string, update: Partial<InsertReturnRequest>): Promise<ReturnRequest>;
 }
 
 export class MongoDBStorage implements IStorage {
@@ -762,6 +776,72 @@ export class MongoDBStorage implements IStorage {
       "items.productId": { $in: productIds }
     }).sort({ createdAt: -1 }).lean();
     return orders.map(o => ({ ...o, id: (o as any)._id.toString() } as any));
+  }
+
+  // Flash Deals
+  async getFlashDeals(activeOnly?: boolean): Promise<FlashDeal[]> {
+    const q = activeOnly ? { isActive: true } : {};
+    const deals = await FlashDealModel.find(q).sort({ createdAt: -1 }).lean();
+    return deals.map(d => ({ ...d, id: (d as any)._id.toString() } as any));
+  }
+
+  async getFlashDeal(id: string): Promise<FlashDeal | undefined> {
+    try {
+      const d = await FlashDealModel.findById(id).lean();
+      return d ? { ...d, id: (d as any)._id.toString() } as any : undefined;
+    } catch { return undefined; }
+  }
+
+  async createFlashDeal(data: InsertFlashDeal): Promise<FlashDeal> {
+    const d = await FlashDealModel.create(data);
+    return { ...d.toObject(), id: (d as any)._id.toString() } as any;
+  }
+
+  async updateFlashDeal(id: string, update: Partial<InsertFlashDeal>): Promise<FlashDeal> {
+    const d = await FlashDealModel.findByIdAndUpdate(id, { $set: update }, { new: true }).lean();
+    if (!d) throw new Error("Flash deal not found");
+    return { ...d, id: (d as any)._id.toString() } as any;
+  }
+
+  async deleteFlashDeal(id: string): Promise<void> {
+    await FlashDealModel.findByIdAndDelete(id);
+  }
+
+  async getActiveFlashDeals(): Promise<FlashDeal[]> {
+    const now = new Date().toISOString();
+    const deals = await FlashDealModel.find({
+      isActive: true,
+      startTime: { $lte: now },
+      endTime: { $gte: now },
+    }).lean();
+    return deals.map(d => ({ ...d, id: (d as any)._id.toString() } as any));
+  }
+
+  // Return Requests
+  async getReturnRequests(filter?: { userId?: string; status?: string }): Promise<ReturnRequest[]> {
+    const q: any = {};
+    if (filter?.userId) q.userId = filter.userId;
+    if (filter?.status) q.status = filter.status;
+    const returns = await ReturnRequestModel.find(q).sort({ createdAt: -1 }).lean();
+    return returns.map(r => ({ ...r, id: (r as any)._id.toString() } as any));
+  }
+
+  async getReturnRequest(id: string): Promise<ReturnRequest | undefined> {
+    try {
+      const r = await ReturnRequestModel.findById(id).lean();
+      return r ? { ...r, id: (r as any)._id.toString() } as any : undefined;
+    } catch { return undefined; }
+  }
+
+  async createReturnRequest(data: InsertReturnRequest): Promise<ReturnRequest> {
+    const r = await ReturnRequestModel.create(data);
+    return { ...r.toObject(), id: (r as any)._id.toString() } as any;
+  }
+
+  async updateReturnRequest(id: string, update: Partial<InsertReturnRequest>): Promise<ReturnRequest> {
+    const r = await ReturnRequestModel.findByIdAndUpdate(id, { $set: update }, { new: true }).lean();
+    if (!r) throw new Error("Return request not found");
+    return { ...r, id: (r as any)._id.toString() } as any;
   }
 }
 

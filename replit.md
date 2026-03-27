@@ -69,7 +69,7 @@ Preferred communication style: Simple, everyday language.
 - **Storefront**: Product catalog, cart, checkout with multiple Saudi payment methods
 - **Wishlist**: Add/remove products to wishlist with heart button on cards; accessible at `/profile/wishlist`
 - **Product Reviews**: Star ratings (1–5) + comments per product; average rating shown on product detail page
-- **Admin Dashboard**: Analytics, product management, order management, staff roles (RBAC)
+- **Admin Dashboard**: Analytics (real daily revenue 30 days, order status, vendor stats, return counts, revenue growth %), product management, order management, staff roles (RBAC)
 - **Low Stock Alerts**: Admin overview panel shows products with stock ≤ 5 units automatically
 - **Shipping Companies**: Full CRUD admin panel for shipping providers (`/api/shipping-companies`)
 - **Invoice PDF**: Print/download ZATCA-compliant invoices from the customer profile invoices page
@@ -77,6 +77,10 @@ Preferred communication style: Simple, everyday language.
 - **Multi-branch**: Branch-specific inventory tracking with map view
 - **PWA**: Service worker, web app manifest, installable
 - **Multi-Vendor Marketplace**: Sellers apply at `/vendor/apply`, manage store at `/vendor/dashboard`; admin approves/rejects via "البائعون" tab; public store pages at `/stores/:id`; products tagged with "بائع مستقل" badge; vendor role added to userRoles
+- **Flash Deals System**: Admin creates time-limited flash deals (discountPercent, start/end time, maxQuantity); `FlashDeal` model in MongoDB; `/api/flash-deals` public endpoint + `/api/admin/flash-deals` CRUD; homepage shows active deals with real countdown timers tied to actual endTime; "عروض فلاش" tab in admin sidebar
+- **Returns Management**: Customers request returns from completed orders at `/orders` page with reason + detail + refund method; `ReturnRequest` model in MongoDB; `/api/returns` customer route + `/api/admin/returns` admin route; admin approves/rejects with wallet auto-credit on approval; "المرتجعات" tab in admin sidebar with filter by status
+- **Loyalty Points Redemption**: Points earned on order completion; `/api/user/loyalty` endpoint returns tier info (bronze/silver/gold/platinum), point balance, progress to next tier; profile page shows loyalty card with tier badge and progress bar; checkout allows redeeming points for SAR discount (100 points = 1 SAR, max 50 SAR per order)
+- **Enhanced Admin Analytics**: OverviewPanel uses real `dailyRevenue30` data from API; new Quick Action Stats row shows pending returns, active vendors, new customers (30 days), and daily revenue growth %
 
 ### User Roles
 - **admin**: Full access to all features including vendor management

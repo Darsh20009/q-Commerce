@@ -1,17 +1,24 @@
 import { Layout } from "@/components/Layout";
 import { useAuth } from "@/hooks/use-auth";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { api } from "@shared/routes";
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Loader2, ShoppingBag, MapPin, CreditCard, ChevronRight,
   Clock, Truck, CheckCircle, Hash, Calendar, Wallet,
-  Package, Phone, User, AlertCircle, FileText, Bike
+  Package, Phone, User, AlertCircle, FileText, Bike, RotateCcw
 } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 // ─── Status Config ─────────────────────────────────────────────────────────
 const statusConfig: Record<string, {
@@ -177,9 +184,53 @@ const TrackingStepper = ({ order }: { order: any }) => {
 // ─── Order Card ─────────────────────────────────────────────────────────────
 const OrderCard = ({ order }: { order: any }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showReturnDialog, setShowReturnDialog] = useState(false);
+  const [returnReason, setReturnReason] = useState("");
+  const [returnDetail, setReturnDetail] = useState("");
+  const [returnMethod, setReturnMethod] = useState<"wallet" | "original">("wallet");
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
   const status = statusConfig[order.status] || statusConfig.new;
   const StatusIcon = status.icon;
+
+  const returnMutation = useMutation({
+    mutationFn: (data: any) => apiRequest("POST", "/api/returns", data),
+    onSuccess: () => {
+      toast({ title: "✅ تم إرسال طلب الإرجاع", description: "سيتم مراجعة طلبك خلال 24-48 ساعة" });
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      setShowReturnDialog(false);
+    },
+    onError: (e: any) => {
+      toast({ title: "خطأ", description: e.message || "فشل إرسال طلب الإرجاع", variant: "destructive" });
+    },
+  });
+
+  const handleReturnSubmit = () => {
+    if (!returnReason) return toast({ title: "اختر سبب الإرجاع", variant: "destructive" });
+    returnMutation.mutate({
+      orderId: order.id,
+      reason: returnReason,
+      reasonDetail: returnDetail,
+      refundMethod: returnMethod,
+      refundAmount: Number(order.total || 0),
+      items: (order.items || []).map((item: any) => ({
+        productId: item.productId || "",
+        title: item.title || "",
+        quantity: item.quantity || 1,
+        price: Number(item.price || 0),
+      })),
+    });
+  };
+
+  const canRequestReturn = ["completed", "shipped", "delivered"].includes(order.status);
+  const returnReasons = [
+    "المنتج وصل تالفاً",
+    "المنتج لا يطابق الوصف",
+    "خطأ في الطلب",
+    "حجم غير مناسب",
+    "تغيير رأي",
+    "سبب آخر",
+  ];
 
   const handlePrintInvoice = () => {
     const printWindow = window.open("", "", "height=800,width=600");
@@ -285,7 +336,84 @@ const OrderCard = ({ order }: { order: any }) => {
                   محتويات الطلب
                   <ChevronRight className="h-3.5 w-3.5" />
                 </Button>
+                {canRequestReturn && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowReturnDialog(true)}
+                    className="rounded-full px-6 h-11 font-black uppercase tracking-widest text-[10px] border-amber-200 text-amber-700 hover:bg-amber-50 transition-all flex items-center gap-2"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    طلب إرجاع
+                  </Button>
+                )}
               </div>
+
+              {/* Return Dialog */}
+              {showReturnDialog && (
+                <Dialog open={showReturnDialog} onOpenChange={setShowReturnDialog}>
+                  <DialogContent dir="rtl" className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="font-black text-right flex items-center gap-2">
+                        <RotateCcw className="w-4 h-4 text-amber-500" />
+                        طلب إرجاع - #{order.id.slice(-6).toUpperCase()}
+                      </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 pt-2">
+                      <div className="p-3 rounded-xl bg-amber-50 border border-amber-100">
+                        <p className="text-xs font-bold text-amber-700">مبلغ الاسترداد المتوقع: {Number(order.total).toLocaleString()} ر.س</p>
+                        <p className="text-[10px] text-amber-600 mt-0.5">سيتم إعادة المبلغ للمحفظة أو وسيلة الدفع الأصلية</p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs font-bold">سبب الإرجاع</Label>
+                        <Select value={returnReason} onValueChange={setReturnReason}>
+                          <SelectTrigger className="text-right text-sm">
+                            <SelectValue placeholder="اختر السبب..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {returnReasons.map(r => (
+                              <SelectItem key={r} value={r}>{r}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs font-bold">تفاصيل إضافية (اختياري)</Label>
+                        <Textarea
+                          value={returnDetail}
+                          onChange={e => setReturnDetail(e.target.value)}
+                          placeholder="صف المشكلة بالتفصيل..."
+                          className="text-right text-sm resize-none"
+                          rows={3}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs font-bold">طريقة الاسترداد</Label>
+                        <Select value={returnMethod} onValueChange={(v: any) => setReturnMethod(v)}>
+                          <SelectTrigger className="text-right text-sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="wallet">محفظة المتجر</SelectItem>
+                            <SelectItem value="original">وسيلة الدفع الأصلية</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex gap-2 pt-1">
+                        <Button
+                          className="flex-1 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm"
+                          onClick={handleReturnSubmit}
+                          disabled={returnMutation.isPending}
+                        >
+                          {returnMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "إرسال طلب الإرجاع"}
+                        </Button>
+                        <Button variant="outline" className="rounded-xl text-sm" onClick={() => setShowReturnDialog(false)}>
+                          إلغاء
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
 
               {/* ── Expanded: Order items ── */}
               <AnimatePresence>

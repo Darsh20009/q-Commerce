@@ -6,10 +6,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useMutation } from "@tanstack/react-query";
-import { MapPin, User as UserIcon, Plus, Trash2, X, ChevronRight, Navigation, AlertCircle, Loader2 } from "lucide-react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { MapPin, User as UserIcon, Plus, Trash2, X, ChevronRight, Navigation, AlertCircle, Loader2, Award, Star, Gift, Zap } from "lucide-react";
 import { useState } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import { useLocation } from "wouter";
@@ -39,6 +40,80 @@ const passwordSchema = z.object({
   message: "كلمات المرور غير متطابقة",
   path: ["confirmPassword"],
 });
+
+const tierColors: Record<string, { bg: string; text: string; border: string; gradient: string }> = {
+  bronze:   { bg: "bg-amber-950",  text: "text-amber-300",  border: "border-amber-800",  gradient: "from-amber-900 to-amber-950" },
+  silver:   { bg: "bg-slate-800",  text: "text-slate-200",  border: "border-slate-600",  gradient: "from-slate-700 to-slate-900" },
+  gold:     { bg: "bg-yellow-950", text: "text-yellow-300", border: "border-yellow-700", gradient: "from-yellow-800 to-yellow-950" },
+  platinum: { bg: "bg-purple-950", text: "text-purple-300", border: "border-purple-700", gradient: "from-purple-800 to-purple-950" },
+};
+const tierIcons: Record<string, string> = { bronze: "🥉", silver: "🥈", gold: "🥇", platinum: "💎" };
+
+function LoyaltyCard() {
+  const { data: loyalty, isLoading } = useQuery<any>({
+    queryKey: ["/api/user/loyalty"],
+    queryFn: async () => {
+      const res = await fetch("/api/user/loyalty");
+      if (!res.ok) return null;
+      return res.json();
+    },
+    retry: false,
+  });
+
+  if (isLoading) {
+    return <div className="h-32 rounded-2xl bg-slate-100 animate-pulse" />;
+  }
+  if (!loyalty) return null;
+
+  const tier = loyalty.tier || "bronze";
+  const colors = tierColors[tier] || tierColors.bronze;
+  const tierName: Record<string, string> = { bronze: "برونزي", silver: "فضي", gold: "ذهبي", platinum: "بلاتيني" };
+
+  return (
+    <Card className={`rounded-2xl border-none bg-gradient-to-br ${colors.gradient} text-white overflow-hidden`}>
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">{tierIcons[tier]}</span>
+              <div>
+                <p className="font-black text-lg tracking-tight">نقاط الولاء</p>
+                <p className={`text-xs font-bold ${colors.text}`}>{tierName[tier] || tier} • {loyalty.tierInfo?.discount || 0}% خصم دائم</p>
+              </div>
+            </div>
+            <div className="mt-4">
+              <span className="text-4xl font-black tabular-nums">{(loyalty.points || 0).toLocaleString()}</span>
+              <span className={`text-sm font-bold mr-2 ${colors.text}`}>نقطة</span>
+            </div>
+            <p className={`text-xs ${colors.text}`}>
+              القيمة: {loyalty.pointsValue || "0.00"} ر.س
+              {loyalty.nextTier && ` • ${loyalty.nextTierThreshold?.toLocaleString()} ر.س للمستوى التالي`}
+            </p>
+          </div>
+          <div className="text-right space-y-2">
+            <Badge className={`${colors.text} bg-white/10 border border-white/20 text-xs font-black`}>
+              {tierName[tier] || tier}
+            </Badge>
+            {loyalty.nextTier && (
+              <div className="space-y-1 mt-3">
+                <div className="flex justify-between text-[9px] font-bold text-white/60">
+                  <span>{(loyalty.progressToNext || 0)}%</span>
+                  <span>{loyalty.nextTier}</span>
+                </div>
+                <div className="w-24 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-white/80 transition-all rounded-full"
+                    style={{ width: `${loyalty.progressToNext || 0}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 function LocationMarker({ position, setPosition }: { position: L.LatLng | null, setPosition: (pos: L.LatLng) => void }) {
   const map = useMap();
@@ -267,6 +342,9 @@ export default function Profile() {
             </CardContent>
           </Card>
         </div>
+
+        {/* ── Loyalty Points Card ── */}
+        <LoyaltyCard />
 
         <Card className="rounded-none border-black/10 shadow-none">
           <CardHeader className="border-b border-black/5">

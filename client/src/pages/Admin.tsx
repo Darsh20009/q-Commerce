@@ -15,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { insertProductSchema, type InsertProduct, orderStatuses, employeePermissions, insertUserSchema, type InsertUser } from "@shared/schema";
 import { api } from "@shared/routes";
-import { Loader2, Plus, DollarSign, ShoppingCart, TrendingUp, BarChart3, ArrowUpRight, ArrowDownRight, Trash2, Search, Filter, ChevronDown, CheckCircle2, XCircle, Truck, PackageCheck, AlertCircle, LayoutGrid, Tag, Edit, ArrowRight, LogOut, Package, Building, User as UserIcon, History, Monitor, Clock, Settings2, Landmark, Save, CreditCard, ToggleLeft, ToggleRight, Megaphone, Send, Bike, Phone, Users, Bell, Globe, Menu, X, Star, Zap, Activity, Shield, ChevronRight, Home, RefreshCw, Eye, Wallet, MoreVertical, ImageIcon, Pencil, Store } from "lucide-react";
+import { Loader2, Plus, DollarSign, ShoppingCart, TrendingUp, BarChart3, ArrowUpRight, ArrowDownRight, Trash2, Search, Filter, ChevronDown, CheckCircle2, XCircle, Truck, PackageCheck, AlertCircle, LayoutGrid, Tag, Edit, ArrowRight, LogOut, Package, Building, User as UserIcon, History, Monitor, Clock, Settings2, Landmark, Save, CreditCard, ToggleLeft, ToggleRight, Megaphone, Send, Bike, Phone, Users, Bell, Globe, Menu, X, Star, Zap, Activity, Shield, ChevronRight, Home, RefreshCw, Eye, Wallet, MoreVertical, ImageIcon, Pencil, Store, RotateCcw, CalendarClock, Award, TrendingDown, Timer } from "lucide-react";
 import { Link } from "wouter";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -100,6 +100,11 @@ const OverviewPanel = memo(() => {
     totalOrdersCount: stats?.totalOrders || 0,
     recentOrders: stats?.recentOrders || [],
     topProducts: stats?.topProducts || [],
+    pendingReturns: stats?.pendingReturns || 0,
+    activeVendors: stats?.activeVendors || 0,
+    pendingVendors: stats?.pendingVendors || 0,
+    newCustomers30: stats?.newCustomers30 || 0,
+    revenueGrowth: stats?.revenueGrowth || "0",
   };
 
   const statusData = [
@@ -110,15 +115,15 @@ const OverviewPanel = memo(() => {
 
   const hasStatusData = displayStats.totalOrdersCount > 0;
 
-  const weekData = [
-    { name: 'السبت', revenue: 4200 },
-    { name: 'الأحد', revenue: 3100 },
-    { name: 'الأثنين', revenue: 2800 },
-    { name: 'الثلاثاء', revenue: 3500 },
-    { name: 'الأربعاء', revenue: 2600 },
-    { name: 'الخميس', revenue: 4100 },
-    { name: 'الجمعة', revenue: 5200 },
-  ];
+  // Use real daily revenue data (last 14 days for readability)
+  const weekData = useMemo(() => {
+    const daily30 = stats?.dailyRevenue30 || [];
+    if (daily30.length >= 7) {
+      return daily30.slice(-14).map((d: any) => ({ name: d.date, revenue: d.revenue, orders: d.orders }));
+    }
+    // Fallback to 6-month chartData
+    return (stats?.chartData || []).map((d: any) => ({ name: d.month, revenue: d.sales, orders: d.orders }));
+  }, [stats]);
 
   return (
     <div className="space-y-6" dir="rtl">
@@ -199,6 +204,48 @@ const OverviewPanel = memo(() => {
               <div key={i} className="w-7 h-7 rounded-full border-2 border-white bg-slate-200" />
             ))}
             <div className="w-7 h-7 rounded-full border-2 border-white bg-primary flex items-center justify-center text-[10px] text-white font-bold">+</div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Quick Action Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Card className="border-none shadow-sm bg-white p-4 flex items-center gap-3">
+          <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl shrink-0">
+            <RotateCcw className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-[10px] text-muted-foreground font-bold uppercase">مرتجعات معلقة</p>
+            <p className="text-2xl font-black text-amber-600">{displayStats.pendingReturns}</p>
+          </div>
+        </Card>
+        <Card className="border-none shadow-sm bg-white p-4 flex items-center gap-3">
+          <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl shrink-0">
+            <Store className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-[10px] text-muted-foreground font-bold uppercase">بائعون نشطون</p>
+            <p className="text-2xl font-black text-emerald-600">{displayStats.activeVendors}</p>
+          </div>
+        </Card>
+        <Card className="border-none shadow-sm bg-white p-4 flex items-center gap-3">
+          <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+            <Users className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-[10px] text-muted-foreground font-bold uppercase">عملاء جدد (30 يوم)</p>
+            <p className="text-2xl font-black text-blue-600">{displayStats.newCustomers30}</p>
+          </div>
+        </Card>
+        <Card className={`border-none shadow-sm p-4 flex items-center gap-3 ${Number(displayStats.revenueGrowth) >= 0 ? "bg-emerald-50" : "bg-red-50"}`}>
+          <div className={`p-2.5 rounded-xl shrink-0 ${Number(displayStats.revenueGrowth) >= 0 ? "bg-emerald-100 text-emerald-600" : "bg-red-100 text-red-600"}`}>
+            {Number(displayStats.revenueGrowth) >= 0 ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
+          </div>
+          <div>
+            <p className="text-[10px] text-muted-foreground font-bold uppercase">نمو الإيرادات</p>
+            <p className={`text-2xl font-black ${Number(displayStats.revenueGrowth) >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+              {Number(displayStats.revenueGrowth) >= 0 ? "+" : ""}{displayStats.revenueGrowth}%
+            </p>
           </div>
         </Card>
       </div>
@@ -1718,43 +1765,416 @@ const OrdersTable = memo(() => {
   );
 });
 
-const ReturnsTable = memo(() => {
-  const { data: orders } = useQuery({
-    queryKey: ["/api/orders"],
+// ─── Admin Returns Panel ───────────────────────────────────────────────────
+const AdminReturnsPanel = memo(() => {
+  const { toast } = useToast();
+  const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected" | "completed">("all");
+  const [selected, setSelected] = useState<any>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const { data: returns = [], isLoading, refetch } = useQuery<any[]>({
+    queryKey: ["/api/admin/returns", filter],
     queryFn: async () => {
-      const res = await fetch("/api/orders");
+      const url = filter === "all" ? "/api/admin/returns" : `/api/admin/returns?status=${filter}`;
+      const res = await fetch(url);
       return res.json();
-    }
+    },
   });
 
-  const returnOrders = useMemo(() => {
-    return (orders || []).filter((o: any) => o.returnRequest && o.returnRequest.status !== 'none');
-  }, [orders]);
+  const handleAction = async (id: string, status: string, adminNote: string, refundAmount: number) => {
+    setActionLoading(true);
+    try {
+      await apiRequest("PATCH", `/api/admin/returns/${id}`, { status, adminNote, refundAmount });
+      toast({ title: status === "approved" ? "✅ تم قبول طلب الإرجاع" : "❌ تم رفض الطلب" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/returns"] });
+      setSelected(null);
+      refetch();
+    } catch (e: any) {
+      toast({ title: "خطأ", description: e.message, variant: "destructive" });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const statusConfig: Record<string, { label: string; color: string }> = {
+    pending:   { label: "قيد الانتظار", color: "bg-amber-100 text-amber-700" },
+    approved:  { label: "مقبول",        color: "bg-green-100 text-green-700" },
+    rejected:  { label: "مرفوض",        color: "bg-red-100 text-red-700" },
+    completed: { label: "مكتمل",        color: "bg-slate-100 text-slate-600" },
+  };
+
+  const [noteText, setNoteText] = useState("");
+  const [refundAmt, setRefundAmt] = useState(0);
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold uppercase tracking-tight">الاسترجاع والاستبدال</h2>
-      <div className="rounded-none border border-black/5 overflow-hidden">
-        {returnOrders.length === 0 ? (
-          <div className="p-24 text-center text-black/20">
-            <AlertCircle className="w-12 h-12 mx-auto mb-4" />
-            <p className="font-bold uppercase tracking-widest text-xs">لا توجد طلبات استرجاع حالياً</p>
-          </div>
-        ) : (
-          <div className="divide-y divide-black/5">
-            {returnOrders.map((order: any) => (
-              <div key={order.id} className="p-6 flex justify-between items-center hover:bg-secondary/10">
-                <div className="space-y-1">
-                  <p className="font-black text-sm">#{order.id.slice(-6).toUpperCase()}</p>
-                  <p className="text-[10px] font-bold uppercase text-black/40">{order.returnRequest.type === 'return' ? 'استرجاع' : 'استبدال'}</p>
-                </div>
-                <Badge variant="outline" className="rounded-none">{order.returnRequest.status}</Badge>
-                <Button variant="ghost" className="rounded-none text-xs font-bold border border-black/5">إدارة الطلب</Button>
-              </div>
-            ))}
-          </div>
-        )}
+    <div className="space-y-6" dir="rtl">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-black text-slate-900">المرتجعات والاسترداد</h2>
+          <p className="text-xs text-slate-500 mt-0.5">إدارة طلبات إرجاع العملاء</p>
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          {(["all", "pending", "approved", "rejected", "completed"] as const).map(s => (
+            <Button key={s} size="sm" variant={filter === s ? "default" : "outline"}
+              className="text-xs rounded-xl" onClick={() => setFilter(s)}>
+              {s === "all" ? "الكل" : statusConfig[s]?.label || s}
+            </Button>
+          ))}
+        </div>
       </div>
+
+      {isLoading ? (
+        <div className="space-y-3">
+          {[1,2,3].map(i => <div key={i} className="h-20 rounded-2xl bg-slate-100 animate-pulse" />)}
+        </div>
+      ) : returns.length === 0 ? (
+        <Card className="border-none shadow-sm">
+          <CardContent className="p-16 text-center">
+            <RotateCcw className="w-12 h-12 mx-auto text-slate-200 mb-4" />
+            <p className="text-slate-400 font-bold text-sm">لا توجد طلبات مرتجعات</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {returns.map((ret: any) => (
+            <Card key={ret.id || ret._id} className="border-none shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-black text-sm text-slate-900">#{(ret.orderId || "").slice(-6).toUpperCase()}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusConfig[ret.status]?.color || "bg-slate-100 text-slate-600"}`}>
+                        {statusConfig[ret.status]?.label || ret.status}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 font-medium">
+                      العميل: {ret.customer?.name || ret.userId?.slice(-8) || "—"}
+                      {ret.customer?.phone && <span className="mr-2 text-primary">{ret.customer.phone}</span>}
+                    </p>
+                    <p className="text-xs text-slate-600">السبب: <span className="font-semibold">{ret.reason}</span></p>
+                    {ret.reasonDetail && <p className="text-xs text-slate-400 italic">{ret.reasonDetail}</p>}
+                    <div className="flex gap-3 text-xs text-slate-400">
+                      <span>{ret.items?.length || 0} منتج</span>
+                      <span>•</span>
+                      <span>المبلغ المقترح: {ret.refundAmount?.toLocaleString() || "0"} ر.س</span>
+                      <span>•</span>
+                      <span>{ret.createdAt ? new Date(ret.createdAt).toLocaleDateString("ar-SA") : ""}</span>
+                    </div>
+                  </div>
+                  {ret.status === "pending" && (
+                    <Button size="sm" variant="outline" className="text-xs rounded-xl shrink-0"
+                      onClick={() => { setSelected(ret); setNoteText(""); setRefundAmt(ret.refundAmount || 0); }}>
+                      إدارة الطلب
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Action Dialog */}
+      {selected && (
+        <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
+          <DialogContent dir="rtl" className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="font-black text-right">إدارة طلب الإرجاع</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-2">
+              <div className="p-3 rounded-xl bg-slate-50 space-y-1">
+                <p className="text-xs font-bold text-slate-700">طلب رقم: #{(selected.orderId || "").slice(-6).toUpperCase()}</p>
+                <p className="text-xs text-slate-500">السبب: {selected.reason}</p>
+                {selected.reasonDetail && <p className="text-xs text-slate-400 italic">{selected.reasonDetail}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-bold">مبلغ الاسترداد (ر.س)</Label>
+                <Input type="number" value={refundAmt} onChange={e => setRefundAmt(Number(e.target.value))}
+                  className="text-right" placeholder="0.00" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-bold">ملاحظة للعميل</Label>
+                <Textarea value={noteText} onChange={e => setNoteText(e.target.value)}
+                  className="text-right text-sm resize-none" rows={3} placeholder="اختياري..." />
+              </div>
+              <div className="flex gap-2">
+                <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm"
+                  disabled={actionLoading}
+                  onClick={() => handleAction(selected.id || selected._id, "approved", noteText, refundAmt)}>
+                  {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "✅ قبول الإرجاع"}
+                </Button>
+                <Button variant="destructive" className="flex-1 rounded-xl text-sm"
+                  disabled={actionLoading}
+                  onClick={() => handleAction(selected.id || selected._id, "rejected", noteText, 0)}>
+                  رفض الطلب
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
+  );
+});
+
+// ─── Flash Deals Panel ───────────────────────────────────────────────────────
+const FlashDealsPanel = memo(() => {
+  const { toast } = useToast();
+  const [showCreate, setShowCreate] = useState(false);
+  const [editDeal, setEditDeal] = useState<any>(null);
+
+  const { data: deals = [], isLoading, refetch } = useQuery<any[]>({
+    queryKey: ["/api/admin/flash-deals"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/flash-deals");
+      return res.json();
+    },
+  });
+
+  const { data: allProducts = [] } = useQuery<any[]>({
+    queryKey: ["/api/products"],
+  });
+
+  const defaultDeal = {
+    productId: "",
+    title: "",
+    titleEn: "",
+    discountPercent: 20,
+    discountAmount: 0,
+    startTime: new Date().toISOString().slice(0, 16),
+    endTime: new Date(Date.now() + 86400000).toISOString().slice(0, 16),
+    maxQuantity: 50,
+    isActive: true,
+    badgeColor: "#ef4444",
+  };
+
+  const [form, setForm] = useState(defaultDeal);
+
+  const createMutation = useMutation({
+    mutationFn: (data: any) => apiRequest("POST", "/api/admin/flash-deals", data),
+    onSuccess: () => {
+      toast({ title: "✅ تم إنشاء عرض الفلاش" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/flash-deals"] });
+      setShowCreate(false);
+      setForm(defaultDeal);
+      refetch();
+    },
+    onError: (e: any) => toast({ title: "خطأ", description: e.message, variant: "destructive" }),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => apiRequest("PATCH", `/api/admin/flash-deals/${id}`, data),
+    onSuccess: () => {
+      toast({ title: "✅ تم تحديث العرض" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/flash-deals"] });
+      setEditDeal(null);
+      refetch();
+    },
+    onError: (e: any) => toast({ title: "خطأ", description: e.message, variant: "destructive" }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/admin/flash-deals/${id}`),
+    onSuccess: () => {
+      toast({ title: "تم حذف العرض" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/flash-deals"] });
+      refetch();
+    },
+  });
+
+  const handleSubmit = () => {
+    if (!form.productId) return toast({ title: "اختر منتجاً", variant: "destructive" });
+    createMutation.mutate({ ...form, startTime: new Date(form.startTime).toISOString(), endTime: new Date(form.endTime).toISOString() });
+  };
+
+  const handleUpdate = () => {
+    if (!editDeal) return;
+    updateMutation.mutate({ id: editDeal.id || editDeal._id, data: { ...editDeal, startTime: new Date(editDeal.startTime).toISOString(), endTime: new Date(editDeal.endTime).toISOString() } });
+  };
+
+  const DealForm = ({ data, onChange }: { data: any; onChange: (d: any) => void }) => (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label className="text-xs font-bold">المنتج</Label>
+        <Select value={data.productId} onValueChange={v => onChange({ ...data, productId: v })}>
+          <SelectTrigger className="text-right text-sm">
+            <SelectValue placeholder="اختر منتجاً..." />
+          </SelectTrigger>
+          <SelectContent>
+            {(allProducts as any[]).map((p: any) => (
+              <SelectItem key={p.id || p._id} value={p.id || p._id}>
+                {p.name || p.nameAr || p.id}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-2">
+          <Label className="text-xs font-bold">العنوان (عربي)</Label>
+          <Input value={data.title} onChange={e => onChange({ ...data, title: e.target.value })} placeholder="عرض خاص..." className="text-right" />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-xs font-bold">العنوان (إنجليزي)</Label>
+          <Input value={data.titleEn} onChange={e => onChange({ ...data, titleEn: e.target.value })} placeholder="Flash Sale..." />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-2">
+          <Label className="text-xs font-bold">نسبة الخصم %</Label>
+          <Input type="number" min={1} max={99} value={data.discountPercent}
+            onChange={e => onChange({ ...data, discountPercent: Number(e.target.value) })} className="text-right" />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-xs font-bold">الحد الأقصى للكمية</Label>
+          <Input type="number" min={0} value={data.maxQuantity}
+            onChange={e => onChange({ ...data, maxQuantity: Number(e.target.value) })} className="text-right" />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-2">
+          <Label className="text-xs font-bold">وقت البدء</Label>
+          <Input type="datetime-local" value={data.startTime?.slice(0, 16)}
+            onChange={e => onChange({ ...data, startTime: e.target.value })} />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-xs font-bold">وقت الانتهاء</Label>
+          <Input type="datetime-local" value={data.endTime?.slice(0, 16)}
+            onChange={e => onChange({ ...data, endTime: e.target.value })} />
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <Switch checked={data.isActive} onCheckedChange={v => onChange({ ...data, isActive: v })} />
+        <Label className="text-xs font-bold">{data.isActive ? "نشط" : "معطل"}</Label>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-6" dir="rtl">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
+            <Zap className="w-5 h-5 text-amber-500" />
+            عروض الفلاش
+          </h2>
+          <p className="text-xs text-slate-500 mt-0.5">عروض محدودة الوقت مع عداد تنازلي</p>
+        </div>
+        <Button className="rounded-xl text-sm gap-2" onClick={() => setShowCreate(true)}>
+          <Plus className="w-4 h-4" />
+          عرض جديد
+        </Button>
+      </div>
+
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[1,2].map(i => <div key={i} className="h-40 rounded-2xl bg-slate-100 animate-pulse" />)}
+        </div>
+      ) : deals.length === 0 ? (
+        <Card className="border-none shadow-sm">
+          <CardContent className="p-16 text-center">
+            <Zap className="w-12 h-12 mx-auto text-slate-200 mb-4" />
+            <p className="text-slate-400 font-bold text-sm">لا توجد عروض فلاش</p>
+            <p className="text-slate-300 text-xs mt-1">ابدأ بإنشاء أول عرض فلاش لزيادة المبيعات</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {deals.map((deal: any) => {
+            const now = Date.now();
+            const end = new Date(deal.endTime).getTime();
+            const start = new Date(deal.startTime).getTime();
+            const isActive = deal.isActive && now >= start && now <= end;
+            const isExpired = now > end;
+            const progress = deal.maxQuantity > 0 ? Math.min(100, Math.round((deal.soldCount / deal.maxQuantity) * 100)) : 0;
+            return (
+              <Card key={deal.id || deal._id} className={`border-none shadow-sm overflow-hidden ${isExpired ? "opacity-60" : ""}`}>
+                <div className={`h-1.5 ${isActive ? "bg-gradient-to-r from-red-500 to-amber-500" : "bg-slate-200"}`} />
+                <CardContent className="p-5 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${isActive ? "bg-red-100 text-red-600" : isExpired ? "bg-slate-100 text-slate-400" : "bg-amber-100 text-amber-700"}`}>
+                          {isActive ? "🔥 نشط" : isExpired ? "انتهى" : "قادم"}
+                        </span>
+                        <span className="text-xs font-black text-red-600">{deal.discountPercent}% خصم</span>
+                      </div>
+                      <p className="font-black text-sm text-slate-900 mt-1">{deal.title || deal.product?.name || deal.productId}</p>
+                      <p className="text-xs text-slate-400">{deal.product?.nameAr || deal.product?.name || ""}</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button size="icon" variant="ghost" className="w-8 h-8 rounded-lg"
+                        onClick={() => setEditDeal({ ...deal, startTime: deal.startTime?.slice(0, 16), endTime: deal.endTime?.slice(0, 16) })}>
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button size="icon" variant="ghost" className="w-8 h-8 rounded-lg text-red-500 hover:text-red-600"
+                        onClick={() => deleteMutation.mutate(deal.id || deal._id)}>
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="text-[10px] text-slate-400 space-y-0.5">
+                    <div className="flex items-center gap-1">
+                      <CalendarClock className="w-3 h-3" />
+                      <span>{new Date(deal.startTime).toLocaleString("ar-SA", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                      <span>→</span>
+                      <span>{new Date(deal.endTime).toLocaleString("ar-SA", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                    </div>
+                  </div>
+                  {deal.maxQuantity > 0 && (
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[10px] text-slate-400 font-bold">
+                        <span>المباع: {deal.soldCount || 0}</span>
+                        <span>الحد: {deal.maxQuantity}</span>
+                      </div>
+                      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-primary to-primary/70 transition-all" style={{ width: `${progress}%` }} />
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Create Dialog */}
+      <Dialog open={showCreate} onOpenChange={setShowCreate}>
+        <DialogContent dir="rtl" className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-black text-right flex items-center gap-2">
+              <Zap className="w-4 h-4 text-amber-500" /> إنشاء عرض فلاش جديد
+            </DialogTitle>
+          </DialogHeader>
+          <DealForm data={form} onChange={setForm} />
+          <div className="flex gap-2 pt-2">
+            <Button className="flex-1 rounded-xl" onClick={handleSubmit} disabled={createMutation.isPending}>
+              {createMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "إنشاء العرض"}
+            </Button>
+            <Button variant="outline" className="rounded-xl" onClick={() => setShowCreate(false)}>إلغاء</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      {editDeal && (
+        <Dialog open={!!editDeal} onOpenChange={() => setEditDeal(null)}>
+          <DialogContent dir="rtl" className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="font-black text-right">تعديل عرض الفلاش</DialogTitle>
+            </DialogHeader>
+            <DealForm data={editDeal} onChange={setEditDeal} />
+            <div className="flex gap-2 pt-2">
+              <Button className="flex-1 rounded-xl" onClick={handleUpdate} disabled={updateMutation.isPending}>
+                {updateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "حفظ التغييرات"}
+              </Button>
+              <Button variant="outline" className="rounded-xl" onClick={() => setEditDeal(null)}>إلغاء</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 });
@@ -3467,6 +3887,13 @@ const AdminSidebar = ({ activeTab, onTabChange, pendingOrders }: { activeTab: st
       ]
     },
     {
+      label: "التسويق",
+      items: [
+        { id: "flash-deals", label: "عروض فلاش", icon: Zap },
+        { id: "returns", label: "المرتجعات", icon: RotateCcw },
+      ]
+    },
+    {
       label: "النظام",
       items: [
         { id: "logs", label: "سجل العمليات", icon: History },
@@ -3593,20 +4020,23 @@ const AdminSidebar = ({ activeTab, onTabChange, pendingOrders }: { activeTab: st
 };
 
 const pageTitles: Record<string, string> = {
-  overview:   "نظرة عامة",
-  products:   "إدارة المنتجات",
-  categories: "الفئات والأقسام",
-  inventory:  "جرد الفروع",
-  shifts:     "إدارة الورديات",
-  orders:     "الطلبات",
-  staff:      "إدارة الطاقم",
-  branches:   "إدارة الفروع",
-  customers:  "قاعدة العملاء",
-  coupons:    "أكواد الخصم",
-  broadcast:  "إشعارات جماعية",
-  shipping:   "شركات الشحن",
-  logs:       "سجل العمليات",
-  settings:   "إعدادات المتجر",
+  overview:     "نظرة عامة",
+  products:     "إدارة المنتجات",
+  categories:   "الفئات والأقسام",
+  inventory:    "جرد الفروع",
+  shifts:       "إدارة الورديات",
+  orders:       "الطلبات",
+  staff:        "إدارة الطاقم",
+  branches:     "إدارة الفروع",
+  customers:    "قاعدة العملاء",
+  vendors:      "البائعون",
+  coupons:      "أكواد الخصم",
+  broadcast:    "إشعارات جماعية",
+  shipping:     "شركات الشحن",
+  "flash-deals": "عروض فلاش",
+  returns:      "المرتجعات والاسترداد",
+  logs:         "سجل العمليات",
+  settings:     "إعدادات المتجر",
 };
 
 export default function Admin() {
@@ -3706,6 +4136,8 @@ export default function Admin() {
                 {activeTab === "coupons"   && <CouponsTable />}
                 {activeTab === "marketing" && <MarketingManagement />}
                 {activeTab === "broadcast" && <BroadcastPanel />}
+                {activeTab === "flash-deals" && <FlashDealsPanel />}
+                {activeTab === "returns"   && <AdminReturnsPanel />}
                 {activeTab === "logs"      && <AdminAuditLogs />}
                 {activeTab === "settings"  && <StoreSettingsPanel />}
               </motion.div>

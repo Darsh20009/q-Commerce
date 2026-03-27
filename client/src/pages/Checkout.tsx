@@ -99,6 +99,21 @@ export default function Checkout() {
     staleTime: 1000 * 60 * 5,
   });
 
+  // Loyalty Points
+  const [useLoyaltyPoints, setUseLoyaltyPoints] = useState(false);
+  const { data: loyaltyData } = useQuery<any>({
+    queryKey: ["/api/user/loyalty"],
+    queryFn: async () => {
+      if (!user) return null;
+      const res = await fetch("/api/user/loyalty");
+      if (!res.ok) return null;
+      return res.json();
+    },
+    enabled: !!user,
+  });
+  const availableLoyaltyPoints = loyaltyData?.points || 0;
+  const loyaltyDiscount = useLoyaltyPoints ? Math.min(availableLoyaltyPoints / 100, 50) : 0; // Max 50 SAR redemption
+
   const enabledMethods = storeSettings?.paymentMethods || {
     wallet: true, tap: true, stc_pay: true, apple_pay: true,
     bank_transfer: true, tamara: true, tabby: true,
@@ -144,7 +159,7 @@ export default function Checkout() {
   const subtotal = total();
   const tax = subtotal * 0.15;
   const shipping = shippingPrice;
-  const finalTotal = subtotal + tax + shipping - discountAmount;
+  const finalTotal = Math.max(0, subtotal + tax + shipping - discountAmount - loyaltyDiscount);
 
   const handleCheckoutInitiate = () => {
     if (!user) {
@@ -863,6 +878,30 @@ export default function Checkout() {
                   <div className="flex justify-between text-blue-600 font-black">
                     <span>+ {cashbackAmount.toLocaleString()} ر.س</span>
                     <span>كاش باك</span>
+                  </div>
+                )}
+                {/* Loyalty Points Toggle */}
+                {user && availableLoyaltyPoints >= 100 && (
+                  <div className="border border-amber-200 rounded-xl p-3 bg-amber-50 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => setUseLoyaltyPoints(p => !p)}
+                        className={`w-10 h-5 rounded-full transition-all relative ${useLoyaltyPoints ? "bg-amber-500" : "bg-gray-200"}`}
+                      >
+                        <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${useLoyaltyPoints ? "right-0.5" : "left-0.5"}`} />
+                      </button>
+                      <div className="text-right">
+                        <p className="text-xs font-black text-amber-800">استخدام نقاط الولاء</p>
+                        <p className="text-[10px] text-amber-600">{availableLoyaltyPoints.toLocaleString()} نقطة متاحة</p>
+                      </div>
+                    </div>
+                    {useLoyaltyPoints && (
+                      <div className="flex justify-between text-amber-700 font-black text-sm">
+                        <span>- {loyaltyDiscount.toFixed(2)} ر.س</span>
+                        <span>خصم النقاط</span>
+                      </div>
+                    )}
                   </div>
                 )}
                 <div className="flex justify-between font-black text-lg pt-3 border-t border-gray-100">

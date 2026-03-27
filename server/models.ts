@@ -389,6 +389,46 @@ const productReviewSchema = new Schema(
   { timestamps: true }
 );
 
+const flashDealSchema = new Schema(
+  {
+    productId: { type: String, required: true },
+    title: { type: String, default: "" },
+    titleEn: { type: String, default: "" },
+    discountPercent: { type: Number, default: 20 },
+    discountAmount: { type: Number, default: 0 },
+    startTime: { type: String, required: true },
+    endTime: { type: String, required: true },
+    maxQuantity: { type: Number, default: 0 },
+    soldCount: { type: Number, default: 0 },
+    isActive: { type: Boolean, default: true },
+    badgeColor: { type: String, default: "#ef4444" },
+  },
+  { timestamps: true }
+);
+
+const returnRequestSchema = new Schema(
+  {
+    orderId: { type: String, required: true },
+    userId: { type: String, required: true },
+    items: [{
+      productId: String,
+      title: String,
+      quantity: Number,
+      price: Number,
+    }],
+    reason: { type: String, required: true },
+    reasonDetail: { type: String, default: "" },
+    status: { type: String, enum: ["pending", "approved", "rejected", "completed"], default: "pending" },
+    refundAmount: { type: Number, default: 0 },
+    refundMethod: { type: String, enum: ["wallet", "original"], default: "wallet" },
+    adminNote: { type: String, default: "" },
+    images: { type: [String], default: [] },
+  },
+  { timestamps: true }
+);
+
+export const FlashDealModel = mongoose.model("FlashDeal", flashDealSchema);
+export const ReturnRequestModel = mongoose.model("ReturnRequest", returnRequestSchema);
 export const VendorModel = mongoose.model("Vendor", vendorSchema);
 export const WishlistItemModel = mongoose.model("WishlistItem", wishlistItemSchema);
 export const ProductReviewModel = mongoose.model("ProductReview", productReviewSchema);

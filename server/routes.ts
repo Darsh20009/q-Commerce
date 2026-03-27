@@ -234,6 +234,71 @@ export async function registerRoutes(
         });
       }
 
+      // Daily revenue last 30 days
+      const last30Days = new Date(now);
+      last30Days.setDate(last30Days.getDate() - 29);
+      const recentOrders30 = allOrders.filter(o => new Date(o.createdAt) >= last30Days);
+      const dailyMap: Record<string, { revenue: number; orders: number }> = {};
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const key = d.toLocaleDateString("ar-SA", { month: "short", day: "numeric" });
+        dailyMap[key] = { revenue: 0, orders: 0 };
+      }
+      for (const o of recentOrders30) {
+        const key = new Date(o.createdAt).toLocaleDateString("ar-SA", { month: "short", day: "numeric" });
+        if (dailyMap[key]) {
+          dailyMap[key].revenue += Number(o.total || 0);
+          dailyMap[key].orders += 1;
+        }
+      }
+      const dailyRevenue30 = Object.entries(dailyMap).map(([date, v]) => ({ date, ...v }));
+
+      // Order status counts
+      const orderStatusCounts: Record<string, number> = {};
+      for (const o of allOrders) {
+        orderStatusCounts[o.status] = (orderStatusCounts[o.status] || 0) + 1;
+      }
+
+      // Payment method breakdown
+      const paymentBreakdown: Record<string, number> = {};
+      for (const o of allOrders) {
+        const pm = o.paymentMethod || "unknown";
+        paymentBreakdown[pm] = (paymentBreakdown[pm] || 0) + Number(o.total || 0);
+      }
+
+      // New customers last 30 days
+      const newCustomers30 = await UM.countDocuments({ role: "customer", createdAt: { $gte: last30Days } });
+
+      // Orders today & yesterday
+      const yesterday = new Date(startOfDay);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayOrders = allOrders.filter(o => {
+        const d = new Date(o.createdAt);
+        return d >= yesterday && d < startOfDay;
+      });
+      const todaySales = sumField(dailyOrders, "total");
+      const yesterdaySales = sumField(yesterdayOrders, "total");
+      const revenueGrowth = yesterdaySales > 0 ? ((todaySales - yesterdaySales) / yesterdaySales * 100).toFixed(1) : "0";
+
+      // Recent orders (last 5)
+      const recentOrders = allOrders.slice(-5).reverse().map(o => ({
+        id: (o as any)._id?.toString(),
+        total: o.total,
+        status: o.status,
+        createdAt: o.createdAt,
+        userId: o.userId,
+      }));
+
+      // Return requests count
+      const { ReturnRequestModel } = await import("./models");
+      const pendingReturns = await ReturnRequestModel.countDocuments({ status: "pending" });
+
+      // Vendor count
+      const { VendorModel } = await import("./models");
+      const activeVendors = await VendorModel.countDocuments({ status: "active" });
+      const pendingVendors = await VendorModel.countDocuments({ status: "pending" });
+
       res.json({
         totalSales,
         netProfit,
@@ -244,13 +309,30 @@ export async function registerRoutes(
         totalCustomers,
         topProducts,
         chartData,
+        dailyRevenue30,
+        orderStatusCounts,
+        paymentBreakdown,
+        newCustomers30,
+        revenueGrowth,
+        recentOrders,
+        pendingReturns,
+        activeVendors,
+        pendingVendors,
+        allTime: { totalRevenue: totalSales },
+        today: { totalRevenue: todaySales },
+        thisMonth: { totalRevenue: monthlySales },
+        dailyOrders: dailyOrders.length,
       });
     } catch (err: any) {
       console.error("[API] admin.stats error:", err?.message);
       res.json({
         totalSales: 0, netProfit: 0, dailySales: 0, monthlySales: 0,
         totalOrders: 0, totalProducts: 0, totalCustomers: 0,
-        topProducts: [], chartData: [],
+        topProducts: [], chartData: [], dailyRevenue30: [],
+        orderStatusCounts: {}, paymentBreakdown: {}, newCustomers30: 0,
+        revenueGrowth: "0", recentOrders: [], pendingReturns: 0,
+        activeVendors: 0, pendingVendors: 0,
+        allTime: { totalRevenue: 0 }, today: { totalRevenue: 0 }, thisMonth: { totalRevenue: 0 }, dailyOrders: 0,
       });
     }
   });
@@ -1582,6 +1664,216 @@ export async function registerRoutes(
 
   app.post("/api/shipping/storage-station/create-order", checkPermission("orders.edit"), async (_req, res) => {
     res.json({ success: true, trackingNumber: "SS-" + Math.random().toString(36).substring(7).toUpperCase(), message: "Storage Station B20 stubbed" });
+  });
+
+  // ─── Flash Deals ─────────────────────────────────────────────
+
+  // Public: get active flash deals
+  app.get("/api/flash-deals", async (_req, res) => {
+    try {
+      const deals = await storage.getActiveFlashDeals();
+      // Enrich with product info
+      const enriched = await Promise.all(deals.map(async (deal: any) => {
+        const product = await storage.getProduct(deal.productId);
+        return { ...deal, product: product || null };
+      }));
+      res.json(enriched.filter((d: any) => d.product));
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Admin: get all flash deals
+  app.get("/api/admin/flash-deals", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const user = req.user as any;
+    if (user.role !== "admin") return res.sendStatus(403);
+    try {
+      const deals = await storage.getFlashDeals();
+      const enriched = await Promise.all(deals.map(async (deal: any) => {
+        const product = await storage.getProduct(deal.productId);
+        return { ...deal, product: product || null };
+      }));
+      res.json(enriched);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Admin: create flash deal
+  app.post("/api/admin/flash-deals", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const user = req.user as any;
+    if (user.role !== "admin") return res.sendStatus(403);
+    try {
+      const deal = await storage.createFlashDeal(req.body);
+      res.status(201).json(deal);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Admin: update flash deal
+  app.patch("/api/admin/flash-deals/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const user = req.user as any;
+    if (user.role !== "admin") return res.sendStatus(403);
+    try {
+      const deal = await storage.updateFlashDeal(req.params.id, req.body);
+      res.json(deal);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Admin: delete flash deal
+  app.delete("/api/admin/flash-deals/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const user = req.user as any;
+    if (user.role !== "admin") return res.sendStatus(403);
+    try {
+      await storage.deleteFlashDeal(req.params.id);
+      res.sendStatus(204);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ─── Return Requests ──────────────────────────────────────────
+
+  // Customer: create return request
+  app.post("/api/returns", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const user = req.user as any;
+    try {
+      // verify order belongs to user
+      const order = await storage.getOrder(req.body.orderId);
+      if (!order || order.userId !== user.id) return res.status(403).json({ message: "غير مسموح" });
+      if (!["completed", "shipped", "delivered"].includes(order.status) && order.status !== "completed") {
+        return res.status(400).json({ message: "لا يمكن طلب إرجاع لهذا الطلب" });
+      }
+      // check no existing return
+      const existing = await storage.getReturnRequests({ userId: user.id });
+      const alreadyRequested = existing.some((r: any) => r.orderId === req.body.orderId);
+      if (alreadyRequested) return res.status(409).json({ message: "طلب الإرجاع موجود بالفعل" });
+      const returnReq = await storage.createReturnRequest({
+        ...req.body,
+        userId: user.id,
+        status: "pending",
+      });
+      res.status(201).json(returnReq);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Customer: get own returns
+  app.get("/api/returns", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const user = req.user as any;
+    try {
+      const returns = await storage.getReturnRequests({ userId: user.id });
+      res.json(returns);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Admin: get all returns
+  app.get("/api/admin/returns", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const user = req.user as any;
+    if (user.role !== "admin") return res.sendStatus(403);
+    try {
+      const filter: any = {};
+      if (req.query.status) filter.status = req.query.status as string;
+      const returns = await storage.getReturnRequests(filter);
+      // Enrich with order info
+      const enriched = await Promise.all(returns.map(async (r: any) => {
+        try {
+          const order = await storage.getOrder(r.orderId);
+          const customer = r.userId ? await storage.getUser(r.userId) : null;
+          return { ...r, order: order || null, customer: customer ? { name: customer.name, phone: customer.phone } : null };
+        } catch { return r; }
+      }));
+      res.json(enriched);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Admin: update return request (approve/reject)
+  app.patch("/api/admin/returns/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const user = req.user as any;
+    if (user.role !== "admin") return res.sendStatus(403);
+    try {
+      const returnReq = await storage.getReturnRequest(req.params.id);
+      if (!returnReq) return res.status(404).json({ message: "طلب الإرجاع غير موجود" });
+      const updated = await storage.updateReturnRequest(req.params.id, req.body);
+      // If approved, refund to wallet
+      if (req.body.status === "approved" && returnReq.status !== "approved") {
+        const refundAmount = req.body.refundAmount || returnReq.refundAmount;
+        if (refundAmount > 0 && returnReq.userId) {
+          const customer = await storage.getUser(returnReq.userId);
+          if (customer) {
+            const currentBalance = parseFloat((customer as any).walletBalance || "0");
+            await storage.updateUser(returnReq.userId, {
+              walletBalance: (currentBalance + refundAmount).toString()
+            });
+            await storage.createWalletTransaction({
+              userId: returnReq.userId,
+              amount: refundAmount,
+              type: "credit",
+              description: `استرداد طلب #${returnReq.orderId?.slice(-6)}`,
+              reference: returnReq.orderId,
+              status: "completed",
+            });
+          }
+        }
+      }
+      res.json(updated);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ─── Loyalty Points ───────────────────────────────────────────
+
+  // Get loyalty info for current user
+  app.get("/api/user/loyalty", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const user = req.user as any;
+    try {
+      const u = await storage.getUser(user.id);
+      if (!u) return res.status(404).json({ message: "User not found" });
+      const points = (u as any).loyaltyPoints || 0;
+      const tier = (u as any).loyaltyTier || "bronze";
+      const totalSpent = (u as any).totalSpent || 0;
+      // Tier thresholds
+      const tiers = {
+        bronze: { min: 0, max: 1000, discount: 1, icon: "🥉", nameAr: "برونزي" },
+        silver: { min: 1000, max: 5000, discount: 2, icon: "🥈", nameAr: "فضي" },
+        gold: { min: 5000, max: 15000, discount: 3, icon: "🥇", nameAr: "ذهبي" },
+        platinum: { min: 15000, max: Infinity, discount: 5, icon: "💎", nameAr: "بلاتيني" },
+      };
+      const tierInfo = tiers[tier as keyof typeof tiers] || tiers.bronze;
+      const nextTier = tier === "bronze" ? "silver" : tier === "silver" ? "gold" : tier === "gold" ? "platinum" : null;
+      const nextTierInfo = nextTier ? tiers[nextTier as keyof typeof tiers] : null;
+      const progressToNext = nextTierInfo ? Math.min(100, Math.round((totalSpent - tierInfo.min) / (tierInfo.max - tierInfo.min) * 100)) : 100;
+      res.json({
+        points,
+        tier,
+        tierInfo: { ...tierInfo, name: tier },
+        totalSpent,
+        nextTier,
+        nextTierThreshold: nextTierInfo?.min,
+        progressToNext,
+        pointsValue: (points / 100).toFixed(2), // 100 points = 1 SAR
+      });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
   });
 
   // ─── Vendor / Multi-Seller Marketplace ───────────────────────
