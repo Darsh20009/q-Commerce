@@ -105,6 +105,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Known Fixes Applied
 
+- **server/auth.ts**: Replaced in-memory session store (MemoryStore) with MongoDB-backed session store (connect-mongo) — sessions now survive server restarts; previously any restart would invalidate all active logins
 - **Dashboard.tsx**: Guarded `user.name`, `user.username`, `user.addresses` with null fallbacks to prevent render crashes
 - **AdminStaff.tsx** (`/admin/staff` page): Fixed `user.name.charAt(0)` → `(user.name || user.phone || "م").charAt(0)` and `user.role.toUpperCase()` → `(user.role || "").toUpperCase()` to prevent crash when staff record has no name
 - **App.tsx**: Added `ErrorBoundary` class component wrapping `<Router>` — shows Arabic error message with raw error in dev mode

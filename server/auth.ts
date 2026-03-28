@@ -2,7 +2,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { type Express } from "express";
 import session from "express-session";
-import MemoryStoreFactory from "memorystore";
+import MongoStore from "connect-mongo";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
@@ -29,7 +29,6 @@ const registerLimiter = rateLimit({
 });
 
 const scryptAsync = promisify(scrypt);
-const MemoryStore = MemoryStoreFactory(session);
 
 export function setupAuth(app: Express) {
   let sessionSecret = process.env.SESSION_SECRET;
@@ -38,10 +37,11 @@ export function setupAuth(app: Express) {
       console.error("[FATAL] SESSION_SECRET env var must be set and at least 32 characters in production");
       process.exit(1);
     }
-    // In development, generate a random secret as fallback
     sessionSecret = randomBytes(32).toString("hex");
     console.warn("[AUTH] SESSION_SECRET not set — using a random secret (sessions will reset on restart)");
   }
+
+  const mongoUri = process.env.MONGODB_URI;
 
   const sessionSettings: session.SessionOptions = {
     secret: sessionSecret,
@@ -55,9 +55,15 @@ export function setupAuth(app: Express) {
       secure: process.env.NODE_ENV === "production",
       path: '/'
     },
-    store: new MemoryStore({
-      checkPeriod: 86400000,
-    }),
+    store: mongoUri
+      ? MongoStore.create({
+          mongoUrl: mongoUri,
+          dbName: "qirox",
+          collectionName: "sessions",
+          ttl: 30 * 24 * 60 * 60, // 30 days in seconds
+          autoRemove: "native",
+        })
+      : undefined,
   };
 
   if (app.get("env") === "production") {
