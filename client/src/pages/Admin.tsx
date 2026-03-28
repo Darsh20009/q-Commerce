@@ -77,6 +77,15 @@ const OverviewPanel = memo(() => {
     }
   });
 
+  // Must be before any early return to follow Rules of Hooks
+  const weekData = useMemo(() => {
+    const daily30 = stats?.dailyRevenue30 || [];
+    if (daily30.length >= 7) {
+      return daily30.slice(-14).map((d: any) => ({ name: d.date, revenue: d.revenue, orders: d.orders }));
+    }
+    return (stats?.chartData || []).map((d: any) => ({ name: d.month, revenue: d.sales, orders: d.orders }));
+  }, [stats]);
+
   if (isLoading) return (
     <div className="space-y-6">
       <div className="h-48 rounded-[2.5rem] animate-pulse bg-slate-200" />
@@ -114,16 +123,6 @@ const OverviewPanel = memo(() => {
   ];
 
   const hasStatusData = displayStats.totalOrdersCount > 0;
-
-  // Use real daily revenue data (last 14 days for readability)
-  const weekData = useMemo(() => {
-    const daily30 = stats?.dailyRevenue30 || [];
-    if (daily30.length >= 7) {
-      return daily30.slice(-14).map((d: any) => ({ name: d.date, revenue: d.revenue, orders: d.orders }));
-    }
-    // Fallback to 6-month chartData
-    return (stats?.chartData || []).map((d: any) => ({ name: d.month, revenue: d.sales, orders: d.orders }));
-  }, [stats]);
 
   return (
     <div className="space-y-6" dir="rtl">
