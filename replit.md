@@ -105,12 +105,20 @@ Preferred communication style: Simple, everyday language.
 
 ## Known Fixes Applied
 
-- **server/auth.ts**: Replaced in-memory session store (MemoryStore) with MongoDB-backed session store (connect-mongo) — sessions now survive server restarts; previously any restart would invalidate all active logins
+- **server/auth.ts**: Replaced in-memory session store (MemoryStore) with MongoDB-backed session store (connect-mongo) — sessions now survive server restarts
 - **Dashboard.tsx**: Guarded `user.name`, `user.username`, `user.addresses` with null fallbacks to prevent render crashes
-- **AdminStaff.tsx** (`/admin/staff` page): Fixed `user.name.charAt(0)` → `(user.name || user.phone || "م").charAt(0)` and `user.role.toUpperCase()` → `(user.role || "").toUpperCase()` to prevent crash when staff record has no name
-- **App.tsx**: Added `ErrorBoundary` class component wrapping `<Router>` — shows Arabic error message with raw error in dev mode
-- **Admin.tsx** & **Dashboard.tsx**: Moved `setLocation()` redirects from render to `useEffect` to prevent React state-during-render warnings
-- **PWAPrompt.tsx**: Created install & notification permission banners for all visitors
+- **AdminStaff.tsx**: Fixed `user.name.charAt(0)` and `user.role.toUpperCase()` crashes when staff has no name
+- **App.tsx**: Added `ErrorBoundary` wrapping `<Router>` — shows Arabic error message
+- **Admin.tsx** & **Dashboard.tsx**: Moved `setLocation()` redirects to `useEffect`
+- **AdminBranches (inline Admin.tsx)**: Was read-only; replaced with full add/delete/toggle UI
+- **AdminBranches.tsx** (standalone page): Fixed POST/PATCH/DELETE endpoints from `/api/branches` → `/api/admin/branches`; added DELETE `/api/admin/branches/:id` backend route
+- **server/routes.ts — 5 missing route groups added**:
+  - `GET/POST/PATCH/DELETE /api/banners` — AdminBanners.tsx was 404-ing on all writes (model/storage existed but no routes)
+  - `GET/POST/DELETE /api/coupons` — Admin coupon panel was 404-ing (storage existed but no routes)
+  - `GET /api/cash-shifts`, `POST /api/cash-shifts/open`, `PATCH /api/cash-shifts/:id/close`, `GET /api/cash-shifts/branch/:branchId/report` — CashDrawer.tsx used different URL prefix than POS routes
+  - `GET/PATCH /api/admin/inventory`, `GET/POST/PATCH /api/admin/transfers` — AdminBranchInventory.tsx was 404-ing (storage existed but no routes)
+  - `DELETE /api/admin/roles/:id` — AdminRoles.tsx delete button was 404-ing
+- **Checkout.tsx**: Fixed URL `/api/shipping/storage-station/create` → `/api/shipping/storage-station/create-order`
 
 ## Development
 

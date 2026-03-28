@@ -1064,6 +1064,214 @@ export async function registerRoutes(
     }
   });
 
+  app.delete("/api/admin/roles/:id", checkPermission("staff.manage"), async (req, res) => {
+    try {
+      await storage.deleteRole(req.params.id);
+      res.sendStatus(204);
+    } catch (err: any) {
+      console.error("[API] roles.delete error:", err?.message);
+      res.status(500).json({ message: "خطأ في حذف الدور" });
+    }
+  });
+
+  // Banners
+  app.get("/api/banners", async (_req, res) => {
+    try {
+      const banners = await storage.getBanners();
+      res.json(banners);
+    } catch (err: any) {
+      console.error("[API] banners.list error:", err?.message);
+      res.json([]);
+    }
+  });
+
+  app.post("/api/banners", checkPermission("settings.manage"), async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const banner = await storage.createBanner(req.body);
+      res.status(201).json(banner);
+    } catch (err: any) {
+      console.error("[API] banners.create error:", err?.message);
+      res.status(500).json({ message: "خطأ في إنشاء البانر" });
+    }
+  });
+
+  app.patch("/api/banners/:id", checkPermission("settings.manage"), async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const banner = await storage.updateBanner(req.params.id, req.body);
+      res.json(banner);
+    } catch (err: any) {
+      console.error("[API] banners.update error:", err?.message);
+      res.status(500).json({ message: "خطأ في تحديث البانر" });
+    }
+  });
+
+  app.delete("/api/banners/:id", checkPermission("settings.manage"), async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      await storage.deleteBanner(req.params.id);
+      res.sendStatus(204);
+    } catch (err: any) {
+      console.error("[API] banners.delete error:", err?.message);
+      res.status(500).json({ message: "خطأ في حذف البانر" });
+    }
+  });
+
+  // Coupons
+  app.get("/api/coupons", async (_req, res) => {
+    try {
+      const coupons = await storage.getCoupons();
+      res.json(coupons);
+    } catch (err: any) {
+      console.error("[API] coupons.list error:", err?.message);
+      res.json([]);
+    }
+  });
+
+  app.post("/api/coupons", checkPermission("settings.manage"), async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const parsed = insertCouponSchema.safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ message: "بيانات الكوبون غير صحيحة" });
+      const coupon = await storage.createCoupon(parsed.data);
+      res.status(201).json(coupon);
+    } catch (err: any) {
+      console.error("[API] coupons.create error:", err?.message);
+      res.status(500).json({ message: "خطأ في إنشاء الكوبون" });
+    }
+  });
+
+  app.delete("/api/coupons/:id", checkPermission("settings.manage"), async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      await storage.deleteCoupon(req.params.id);
+      res.sendStatus(204);
+    } catch (err: any) {
+      console.error("[API] coupons.delete error:", err?.message);
+      res.status(500).json({ message: "خطأ في حذف الكوبون" });
+    }
+  });
+
+  // Cash Shifts (alias routes used by CashDrawer.tsx)
+  app.get("/api/cash-shifts", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const branchId = req.query.branchId as string | undefined;
+      const shifts = await storage.getCashShifts(branchId);
+      res.json(shifts);
+    } catch (err: any) {
+      console.error("[API] cash-shifts.list error:", err?.message);
+      res.json([]);
+    }
+  });
+
+  app.post("/api/cash-shifts/open", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const user = req.user as any;
+      const shift = await storage.createCashShift({
+        ...req.body,
+        cashierId: user.id || user._id,
+        openedAt: new Date(),
+        status: "open"
+      });
+      res.status(201).json(shift);
+    } catch (err: any) {
+      console.error("[API] cash-shifts.open error:", err?.message);
+      res.status(500).json({ message: "خطأ في فتح الوردية" });
+    }
+  });
+
+  app.patch("/api/cash-shifts/:id/close", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const shift = await storage.updateCashShift(req.params.id, {
+        ...req.body,
+        closedAt: new Date(),
+        status: "closed"
+      });
+      res.json(shift);
+    } catch (err: any) {
+      console.error("[API] cash-shifts.close error:", err?.message);
+      res.status(500).json({ message: "خطأ في إغلاق الوردية" });
+    }
+  });
+
+  app.get("/api/cash-shifts/branch/:branchId/report", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const shifts = await storage.getCashShifts(req.params.branchId);
+      const completed = shifts.filter((s: any) => s.status === "closed");
+      const totalSales = completed.reduce((sum: number, s: any) => sum + (parseFloat(s.totalSales) || 0), 0);
+      const totalExpenses = completed.reduce((sum: number, s: any) => sum + (parseFloat(s.totalExpenses) || 0), 0);
+      res.json({ shifts: completed, totalSales, totalExpenses, netCash: totalSales - totalExpenses });
+    } catch (err: any) {
+      console.error("[API] cash-shifts.report error:", err?.message);
+      res.status(500).json({ message: "خطأ في تقرير الوردية" });
+    }
+  });
+
+  // Branch Inventory
+  app.get("/api/admin/inventory", checkPermission("settings.manage"), async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const branchId = (req.query.branchId as string) || "central";
+      const inventory = await storage.getBranchInventory(branchId);
+      res.json(inventory);
+    } catch (err: any) {
+      console.error("[API] inventory.list error:", err?.message);
+      res.json([]);
+    }
+  });
+
+  app.patch("/api/admin/inventory/:id", checkPermission("settings.manage"), async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const item = await storage.updateBranchStock(req.params.id, req.body.stock);
+      res.json(item);
+    } catch (err: any) {
+      console.error("[API] inventory.update error:", err?.message);
+      res.status(500).json({ message: "خطأ في تحديث المخزون" });
+    }
+  });
+
+  // Stock Transfers
+  app.get("/api/admin/transfers", checkPermission("settings.manage"), async (_req, res) => {
+    if (!_req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const transfers = await storage.getStockTransfers();
+      res.json(transfers);
+    } catch (err: any) {
+      console.error("[API] transfers.list error:", err?.message);
+      res.json([]);
+    }
+  });
+
+  app.post("/api/admin/transfers", checkPermission("settings.manage"), async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const user = req.user as any;
+      const transfer = await storage.createStockTransfer({ ...req.body, requestedBy: user.id || user._id });
+      res.status(201).json(transfer);
+    } catch (err: any) {
+      console.error("[API] transfers.create error:", err?.message);
+      res.status(500).json({ message: "خطأ في إنشاء طلب النقل" });
+    }
+  });
+
+  app.patch("/api/admin/transfers/:id/status", checkPermission("settings.manage"), async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const user = req.user as any;
+      const transfer = await storage.updateStockTransferStatus(req.params.id, req.body.status, user.id || user._id);
+      res.json(transfer);
+    } catch (err: any) {
+      console.error("[API] transfers.status error:", err?.message);
+      res.status(500).json({ message: "خطأ في تحديث حالة النقل" });
+    }
+  });
+
   app.patch("/api/pos/shifts/:id", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     try {

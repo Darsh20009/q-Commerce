@@ -282,7 +282,7 @@ export default function Checkout() {
         if (tabbyData.checkoutUrl) { setLocation(tabbyData.checkoutUrl + `&orderId=${order.id}`); return; }
       }
       try {
-        await apiRequest("POST", "/api/shipping/storage-station/create", {
+        await apiRequest("POST", "/api/shipping/storage-station/create-order", {
           orderId: order.id, provider: selectedShipping?.name || "", deliveryAddress,
         });
       } catch (e) { console.warn("Shipping creation failed, but order was created"); }
