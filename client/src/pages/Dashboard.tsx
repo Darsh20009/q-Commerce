@@ -202,10 +202,10 @@ export default function Dashboard() {
             <div className="relative z-10 mx-4 mt-4 mb-2 p-4 rounded-2xl bg-gradient-to-br from-white/5 to-white/0 border border-white/8">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-lg font-black shadow-lg shadow-blue-500/20">
-                  {user.name.charAt(0)}
+                  {(user.name || user.username || "?").charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p className="font-bold text-sm text-white leading-tight">{user.name}</p>
+                  <p className="font-bold text-sm text-white leading-tight">{user.name || user.username || "مستخدم"}</p>
                   <p className="text-[10px] text-white/40 mt-0.5">{isAdmin ? "مدير المتجر" : "حساب العميل"}</p>
                   <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-400/10 border border-amber-400/20">
                     <Star className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
@@ -328,7 +328,7 @@ export default function Dashboard() {
               >
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                    مرحباً، <span className="bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">{user.name.split(" ")[0]}</span> 👋
+                    مرحباً، <span className="bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">{(user.name || user.username || "مستخدم").split(" ")[0]}</span> 👋
                   </h1>
                   <p className="text-white/30 text-sm mt-1">هذا ما يحدث في حسابك الآن</p>
                 </div>
@@ -623,7 +623,7 @@ export default function Dashboard() {
                           </div>
                           <button
                             onClick={() => {
-                              const addresses = user.addresses.filter((a: any) => a.id !== addr.id);
+                              const addresses = (user.addresses || []).filter((a: any) => a.id !== addr.id);
                               addressMutation.mutate(addresses);
                             }}
                             className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-red-400/50 hover:text-red-400 hover:bg-red-400/10 transition-all"

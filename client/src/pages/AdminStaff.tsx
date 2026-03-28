@@ -241,11 +241,11 @@ export default function AdminStaff() {
             <CardContent className="p-6 flex justify-between items-center">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-black text-white flex items-center justify-center rounded-full font-black">
-                  {user.name.charAt(0)}
+                  {(user.name || user.phone || "م").charAt(0)}
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-lg">{user.name}</p>
-                  <p className="text-xs text-muted-foreground">{user.phone} • {user.role.toUpperCase()}</p>
+                  <p className="font-bold text-lg">{user.name || user.phone || "—"}</p>
+                  <p className="text-xs text-muted-foreground">{user.phone} • {(user.role || "").toUpperCase()}</p>
                 </div>
               </div>
 

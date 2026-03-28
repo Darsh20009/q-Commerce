@@ -103,6 +103,14 @@ Preferred communication style: Simple, everyday language.
 | VAPID_PUBLIC_KEY | Web push notifications public key |
 | VAPID_PRIVATE_KEY | Web push notifications private key |
 
+## Known Fixes Applied
+
+- **Dashboard.tsx**: Guarded `user.name`, `user.username`, `user.addresses` with null fallbacks to prevent render crashes
+- **AdminStaff.tsx** (`/admin/staff` page): Fixed `user.name.charAt(0)` → `(user.name || user.phone || "م").charAt(0)` and `user.role.toUpperCase()` → `(user.role || "").toUpperCase()` to prevent crash when staff record has no name
+- **App.tsx**: Added `ErrorBoundary` class component wrapping `<Router>` — shows Arabic error message with raw error in dev mode
+- **Admin.tsx** & **Dashboard.tsx**: Moved `setLocation()` redirects from render to `useEffect` to prevent React state-during-render warnings
+- **PWAPrompt.tsx**: Created install & notification permission banners for all visitors
+
 ## Development
 
 - **Start**: `npm run dev` — runs tsx server/index.ts + Vite in middleware mode on port 5000

@@ -57,14 +57,20 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
     return { hasError: true, error };
   }
   componentDidCatch(error: Error, info: any) {
-    console.error("[ErrorBoundary]", error, info);
+    console.error("[ErrorBoundary] Caught error:", error.message, "\nStack:", error.stack, "\nInfo:", info?.componentStack);
   }
   render() {
     if (this.state.hasError) {
+      const isDev = import.meta.env.DEV;
       return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 p-8 text-center" dir="rtl">
           <h2 className="text-xl font-bold mb-3 text-slate-800">حدث خطأ غير متوقع</h2>
           <p className="text-slate-500 text-sm mb-6">يرجى إعادة تحميل الصفحة</p>
+          {isDev && this.state.error && (
+            <pre className="text-left text-xs text-red-600 bg-red-50 border border-red-200 rounded p-4 mb-4 max-w-2xl overflow-auto text-wrap">
+              {this.state.error.message}{"\n"}{this.state.error.stack}
+            </pre>
+          )}
           <button
             onClick={() => { this.setState({ hasError: false }); window.location.reload(); }}
             className="px-6 py-2 bg-black text-white text-sm font-bold rounded-none hover:bg-slate-800 transition-colors"
