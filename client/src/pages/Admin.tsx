@@ -15,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { insertProductSchema, type InsertProduct, orderStatuses, employeePermissions, insertUserSchema, type InsertUser } from "@shared/schema";
 import { api } from "@shared/routes";
-import { Loader2, Plus, DollarSign, ShoppingCart, TrendingUp, BarChart3, ArrowUpRight, ArrowDownRight, Trash2, Search, Filter, ChevronDown, CheckCircle2, XCircle, Truck, PackageCheck, AlertCircle, LayoutGrid, Tag, Edit, ArrowRight, LogOut, Package, Building, User as UserIcon, History, Monitor, Clock, Settings2, Landmark, Save, CreditCard, ToggleLeft, ToggleRight, Megaphone, Send, Bike, Phone, Users, Bell, Globe, Menu, X, Star, Zap, Activity, Shield, ChevronRight, Home, RefreshCw, Eye, Wallet, MoreVertical, ImageIcon, Pencil, Store, RotateCcw, CalendarClock, Award, TrendingDown, Timer } from "lucide-react";
+import { Loader2, Plus, DollarSign, ShoppingCart, TrendingUp, BarChart3, ArrowUpRight, ArrowDownRight, Trash2, Search, Filter, ChevronDown, CheckCircle2, XCircle, Truck, PackageCheck, AlertCircle, LayoutGrid, Tag, Edit, ArrowRight, LogOut, Package, Building, User as UserIcon, History, Monitor, Clock, Settings2, Landmark, Save, CreditCard, ToggleLeft, ToggleRight, Megaphone, Send, Bike, Phone, Users, Bell, Globe, Menu, X, Star, Zap, Activity, Shield, ChevronRight, Home, RefreshCw, Eye, Wallet, MoreVertical, ImageIcon, Pencil, Store, RotateCcw, CalendarClock, Award, TrendingDown, Timer, MapPin } from "lucide-react";
 import { Link } from "wouter";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -3325,16 +3325,126 @@ const EmployeesManagement = () => {
 };
 
 const AdminBranches = () => {
+  const { toast } = useToast();
+  const [isOpen, setIsOpen] = useState(false);
+  const [branchName, setBranchName] = useState("");
+  const [branchLocation, setBranchLocation] = useState("");
+  const [branchPhone, setBranchPhone] = useState("");
+
   const { data: branches, isLoading } = useQuery<any[]>({ queryKey: ["/api/branches"] });
-  if (isLoading) return <Loader2 className="animate-spin mx-auto" />;
+
+  const createMutation = useMutation({
+    mutationFn: async (data: { name: string; location: string; phone: string; isActive: boolean }) => {
+      const res = await apiRequest("POST", "/api/admin/branches", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/branches"] });
+      toast({ title: "تم النجاح", description: "تم إضافة الفرع بنجاح" });
+      setIsOpen(false);
+      setBranchName(""); setBranchLocation(""); setBranchPhone("");
+    },
+    onError: () => toast({ title: "خطأ", description: "فشل إضافة الفرع", variant: "destructive" }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => { await apiRequest("DELETE", `/api/admin/branches/${id}`); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["/api/branches"] }); toast({ title: "تم الحذف", description: "تم حذف الفرع" }); },
+    onError: () => toast({ title: "خطأ", description: "فشل حذف الفرع", variant: "destructive" }),
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
+      const res = await apiRequest("PATCH", `/api/admin/branches/${id}`, { isActive });
+      return res.json();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/branches"] }),
+  });
+
+  if (isLoading) return <Loader2 className="animate-spin mx-auto mt-12" />;
+
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-black uppercase tracking-tight">إدارة الفروع</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-black uppercase tracking-tight">إدارة الفروع</h2>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogTrigger asChild>
+            <Button data-testid="button-add-branch" className="gap-2 rounded-none font-black uppercase text-xs">
+              <Plus className="h-4 w-4" /> إضافة فرع
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[400px]" dir="rtl">
+            <DialogHeader>
+              <DialogTitle className="text-right font-black uppercase">فرع جديد</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-2">
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase">اسم الفرع *</label>
+                <Input data-testid="input-branch-name" value={branchName} onChange={e => setBranchName(e.target.value)} placeholder="مثلاً: فرع الرياض" className="rounded-none" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase">الموقع</label>
+                <Input data-testid="input-branch-location" value={branchLocation} onChange={e => setBranchLocation(e.target.value)} placeholder="مثلاً: حي المروج، الرياض" className="rounded-none" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase">رقم الهاتف</label>
+                <Input data-testid="input-branch-phone" value={branchPhone} onChange={e => setBranchPhone(e.target.value)} placeholder="05xxxxxxxx" className="rounded-none" />
+              </div>
+              <Button
+                data-testid="button-submit-branch"
+                className="w-full rounded-none font-black uppercase text-xs"
+                disabled={!branchName.trim() || createMutation.isPending}
+                onClick={() => createMutation.mutate({ name: branchName.trim(), location: branchLocation.trim(), phone: branchPhone.trim(), isActive: true })}
+              >
+                {createMutation.isPending ? <Loader2 className="animate-spin h-4 w-4" /> : "حفظ الفرع"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {(!branches || branches.length === 0) && (
+        <div className="border border-dashed border-black/20 rounded-none p-12 text-center text-muted-foreground text-sm font-bold uppercase">
+          لا يوجد فروع بعد — أضف فرعك الأول
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {branches?.map(branch => (
-          <Card key={branch.id} className="rounded-none border-black/5 hover-elevate">
-            <CardHeader><CardTitle className="text-sm font-black uppercase">{branch.name}</CardTitle></CardHeader>
-            <CardContent><p className="text-[10px] font-bold text-muted-foreground">{branch.location || "لا يوجد موقع"}</p></CardContent>
+          <Card key={branch.id} className="rounded-none border-black/10">
+            <CardHeader className="border-b border-black/5 pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-black uppercase">{branch.name}</CardTitle>
+                <Button
+                  data-testid={`button-delete-branch-${branch.id}`}
+                  variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive"
+                  onClick={() => deleteMutation.mutate(branch.id)}
+                  disabled={deleteMutation.isPending}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-4 space-y-2">
+              <p className="text-[11px] font-bold text-muted-foreground flex items-center gap-1">
+                <MapPin className="h-3 w-3" /> {branch.location || "لا يوجد موقع"}
+              </p>
+              <p className="text-[11px] font-bold text-muted-foreground flex items-center gap-1">
+                <Phone className="h-3 w-3" /> {branch.phone || "لا يوجد رقم"}
+              </p>
+              <div className="pt-2 flex items-center justify-between">
+                <span className={`px-2 py-0.5 text-[10px] font-bold uppercase ${branch.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                  {branch.isActive ? 'نشط' : 'مغلق'}
+                </span>
+                <Button
+                  data-testid={`button-toggle-branch-${branch.id}`}
+                  variant="outline" size="sm" className="rounded-none text-[10px] font-black uppercase h-7"
+                  onClick={() => toggleMutation.mutate({ id: branch.id, isActive: !branch.isActive })}
+                >
+                  {branch.isActive ? 'إغلاق' : 'تفعيل'}
+                </Button>
+              </div>
+            </CardContent>
           </Card>
         ))}
       </div>

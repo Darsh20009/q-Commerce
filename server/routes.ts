@@ -923,6 +923,17 @@ export async function registerRoutes(
     }
   });
 
+  app.delete("/api/admin/branches/:id", checkPermission("settings.manage"), async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      await storage.deleteBranch(req.params.id);
+      res.sendStatus(204);
+    } catch (err: any) {
+      console.error("[API] branches.delete error:", err?.message);
+      res.status(500).json({ message: "خطأ في حذف الفرع" });
+    }
+  });
+
   // Cash Shifts
   app.get("/api/pos/shifts/active", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);

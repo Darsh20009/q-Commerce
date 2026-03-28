@@ -31,7 +31,7 @@ export default function AdminBranches() {
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertBranch) => {
-      const res = await apiRequest("POST", "/api/branches", data);
+      const res = await apiRequest("POST", "/api/admin/branches", data);
       return res.json();
     },
     onSuccess: () => {
@@ -44,7 +44,7 @@ export default function AdminBranches() {
 
   const updateMutation = useMutation({
     mutationFn: async (data: Partial<InsertBranch>) => {
-      const res = await apiRequest("PATCH", `/api/branches/${editingBranch?.id}`, data);
+      const res = await apiRequest("PATCH", `/api/admin/branches/${editingBranch?.id}`, data);
       return res.json();
     },
     onSuccess: () => {
@@ -56,7 +56,7 @@ export default function AdminBranches() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      await apiRequest("DELETE", `/api/branches/${id}`);
+      await apiRequest("DELETE", `/api/admin/branches/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/branches"] });
